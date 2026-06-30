@@ -20,8 +20,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .ntab{padding:0 14px;height:52px;display:flex;align-items:center;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px;user-select:none}
 .ntab:hover{color:var(--text)}
 .ntab.active{color:var(--gold);border-bottom-color:var(--gold)}
-.page{display:none;min-height:100vh}
+.page{display:none}
 .page.active{display:block}
+#page-maps.active{display:flex;flex-direction:column;height:calc(100dvh - 52px);overflow:hidden}
 /* HOME */
 .hero{background:linear-gradient(160deg,#1e0606 0%,#2d0a0a 50%,#1a0505 100%);padding:48px 24px 36px;text-align:center;position:relative;overflow:hidden}
 .hero-title{font-size:28px;font-weight:900;color:#fff;line-height:1.15;margin-bottom:8px;font-family:'Noto Serif SC',serif}
@@ -58,7 +59,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .map-filter-bar::-webkit-scrollbar{display:none}
 .mfilter{padding:4px 12px;border-radius:12px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.04);transition:all .2s;white-space:nowrap;flex-shrink:0;user-select:none}
 .mfilter.active,.mfilter:hover{color:#fff;background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25)}
-.map-wrap{height:300px;min-height:300px;position:relative;overflow:hidden}
+.map-wrap{flex:1;min-height:0;position:relative;overflow:hidden}
 #map{height:100%;width:100%;touch-action:none}
 .map-pin-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer}
 .map-pin-body{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid;transition:transform .15s;position:relative;background:rgba(10,5,5,0.88)}
@@ -774,31 +775,22 @@ function hmapBack(){
 window.addEventListener('load',initHomeMap);
 
 /* ── NAV ──────────────────────────────────────── */
-function sizeMapWrap(){
-  var nav=document.querySelector('.nav');
-  var hdr=document.querySelector('.map-page-header');
-  var h=window.innerHeight-(nav?nav.offsetHeight:52)-(hdr?hdr.offsetHeight:108);
-  var wrap=document.querySelector('.map-wrap');
-  if(wrap) wrap.style.height=Math.max(h,300)+'px';
-}
 function showPage(id,el){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.ntab').forEach(function(t){t.classList.remove('active');});
   document.getElementById('page-'+id).classList.add('active');
   if(el) el.classList.add('active');
   if(id==='maps'){
-    setTimeout(function(){
-      sizeMapWrap();
-      if(!map){initMap();}
-      else{
-        void document.getElementById('map').offsetHeight;
-        map.invalidateSize({animate:false,pan:false});
-        requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        if(!map){initMap();}
+        else{
+          map.invalidateSize({animate:false,pan:false});
           var c=cities[activeCity];
           map.setView(c.center,c.zoom,{animate:false});
-        });
-      }
-    },100);
+        }
+      });
+    });
   }
 }
 function toggleCity(id){var e=document.getElementById('days-'+id),a=document.getElementById('arr-'+id);e.classList.toggle('open');a.textContent=e.classList.contains('open')?'▼':'▶';}
@@ -910,44 +902,29 @@ function renderMarkers(city){
 
 function initMap(){
   if(map){
-    sizeMapWrap();
     map.invalidateSize({animate:false,pan:false});
-    requestAnimationFrame(function(){
-      var c=cities[activeCity];map.setView(c.center,c.zoom,{animate:false});
-    });
+    var c=cities[activeCity];map.setView(c.center,c.zoom,{animate:false});
     return;
   }
   var city=activeCity||'shanghai';
-  sizeMapWrap();
   map=L.map('map',{zoomControl:true,touchZoom:false,tap:false,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false}).setView(cities[city].center,cities[city].zoom);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB · © OSM',maxZoom:19,subdomains:'abcd'}).addTo(map);
   activeFilter='Todos';
-  var RecenterCtrl=L.Control.extend({options:{position:'topleft'},onAdd:function(){var b=L.DomUtil.create('div','leaflet-bar leaflet-control');b.style.marginTop='5px';var btn=L.DomUtil.create('a','',b);btn.innerHTML='⊕';btn.title='Centrar';btn.href='#';btn.style.cssText='font-size:16px;line-height:30px;display:block;width:30px;height:30px;text-align:center;cursor:pointer;color:rgba(255,255,255,0.8)!important;background:rgba(14,4,4,0.92)!important';L.DomEvent.on(btn,'click',function(e){L.DomEvent.stopPropagation(e);L.DomEvent.preventDefault(e);sizeMapWrap();map.invalidateSize({animate:false,pan:false});var c=cities[activeCity];map.setView(c.center,c.zoom,{animate:true,duration:0.6});});return b;}});
+  var RecenterCtrl=L.Control.extend({options:{position:'topleft'},onAdd:function(){var b=L.DomUtil.create('div','leaflet-bar leaflet-control');b.style.marginTop='5px';var btn=L.DomUtil.create('a','',b);btn.innerHTML='⊕';btn.title='Centrar';btn.href='#';btn.style.cssText='font-size:16px;line-height:30px;display:block;width:30px;height:30px;text-align:center;cursor:pointer;color:rgba(255,255,255,0.8)!important;background:rgba(14,4,4,0.92)!important';L.DomEvent.on(btn,'click',function(e){L.DomEvent.stopPropagation(e);L.DomEvent.preventDefault(e);var c=cities[activeCity];map.setView(c.center,c.zoom,{animate:true,duration:0.6});});return b;}});
   new RecenterCtrl().addTo(map);
-  requestAnimationFrame(function(){
-    sizeMapWrap();
-    map.invalidateSize({animate:false,pan:false});
-    requestAnimationFrame(function(){
-      renderMarkers(city);
-    });
-  });
+  map.invalidateSize({animate:false,pan:false});
+  renderMarkers(city);
   window.addEventListener('orientationchange',function(){
     setTimeout(function(){
       if(!map)return;
-      sizeMapWrap();
       map.invalidateSize({animate:false,pan:false});
-      requestAnimationFrame(function(){
-        var c=cities[activeCity];map.setView(c.center,c.zoom,{animate:false});
-      });
-    },500);
+      var c=cities[activeCity];map.setView(c.center,c.zoom,{animate:false});
+    },400);
   });
   window.addEventListener('resize',function(){
     if(!map)return;
-    sizeMapWrap();
     map.invalidateSize({animate:false,pan:false});
-    requestAnimationFrame(function(){
-      var c=cities[activeCity];map.setView(c.center,c.zoom,{animate:false});
-    });
+    var c=cities[activeCity];map.setView(c.center,c.zoom,{animate:false});
   });
 }
 
