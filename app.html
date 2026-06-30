@@ -791,8 +791,8 @@ function showPage(id,el){
     },250);
   }
 }
-function toggleCity(id){var e=document.getElementById('days-'+id),a=document.getElementById('arr-'+id);e.classList.toggle('open');a.textContent=e.classList.contains('open')?'▼':'▶';if(map)setTimeout(function(){map.invalidateSize(true);},300);}
-function toggleDay(id){var b=document.getElementById('body-'+id),t=document.getElementById('tog-'+id);b.classList.toggle('open');t.textContent=b.classList.contains('open')?'▼':'▶';if(map)setTimeout(function(){map.invalidateSize(true);},300);}
+function toggleCity(id){var e=document.getElementById('days-'+id),a=document.getElementById('arr-'+id);e.classList.toggle('open');a.textContent=e.classList.contains('open')?'▼':'▶';}
+function toggleDay(id){var b=document.getElementById('body-'+id),t=document.getElementById('tog-'+id);b.classList.toggle('open');t.textContent=b.classList.contains('open')?'▼':'▶';}
 
 /* ── CATEGORIES ───────────────────────────────── */
 var CAT={'Imperdible':{color:'#f0b429',icon:'⭐'},'Historia':{color:'#e74c3c',icon:'🏛️'},'Naturaleza':{color:'#2ecc71',icon:'🌿'},'Shopping':{color:'#4a9eff',icon:'🛍️'},'Gastronomía':{color:'#ff8c42',icon:'🍜'},'Entretenimiento':{color:'#9b59b6',icon:'🎭'},'Hotel':{color:'#1abc9c',icon:'🏨'}};
