@@ -60,11 +60,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .mfilter.active,.mfilter:hover{color:#fff;background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25)}
 .map-wrap{height:300px;min-height:300px;position:relative;overflow:hidden}
 #map{height:100%;width:100%;touch-action:none}
-.map-pin-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5))}
-.map-pin-body{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;border:2px solid;transition:transform .15s;position:relative}
-.map-pin-body:hover{transform:scale(1.12)}
-.map-pin-tip{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top-width:9px;border-top-style:solid;margin-top:-1px}
-.map-pin-pulse{position:absolute;inset:-6px;border-radius:14px;border:2px solid;animation:pinpulse 2.2s ease-out infinite;opacity:0}
+.map-pin-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.map-pin-body{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid;transition:transform .15s;position:relative;background:rgba(10,5,5,0.88)}
+.map-pin-body:hover{transform:scale(1.15)}
+.map-pin-dot{width:5px;height:5px;border-radius:50%;margin-top:2px;flex-shrink:0}
+.map-pin-pulse{position:absolute;inset:-5px;border-radius:50%;border:1.5px solid;animation:pinpulse 2.4s ease-out infinite;opacity:0}
 @keyframes pinpulse{0%{transform:scale(0.85);opacity:.7}100%{transform:scale(1.7);opacity:0}}
 @keyframes hintbob{0%{transform:translateX(-50%) translateY(0)}100%{transform:translateX(-50%) translateY(-5px)}}
 .leaflet-popup-content-wrapper{background:#0e1525;border:1px solid rgba(255,255,255,0.12);border-radius:14px;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.7);padding:0;overflow:hidden}
@@ -862,7 +862,7 @@ var cities={
 
 var map=null, activeCity='shanghai', activeFilter='Todos', cityMarkers=[];
 
-function makePin(m,cc){var c=CAT[m.cat]||{color:cc,icon:'📍'};return '<div class="map-pin-wrap"><div class="map-pin-body" style="background:'+c.color+'18;border-color:'+c.color+';box-shadow:0 0 18px '+c.color+'44"><div class="map-pin-pulse" style="border-color:'+c.color+'"></div><span style="font-size:17px;line-height:1">'+c.icon+'</span></div><div class="map-pin-tip" style="border-top-color:'+c.color+'"></div></div>';}
+function makePin(m,cc){var c=CAT[m.cat]||{color:cc,icon:'📍'};return '<div class="map-pin-wrap"><div class="map-pin-body" style="border-color:'+c.color+';box-shadow:0 2px 12px '+c.color+'55,0 0 0 1px '+c.color+'22"><div class="map-pin-pulse" style="border-color:'+c.color+'"></div><span style="line-height:1">'+c.icon+'</span></div><div class="map-pin-dot" style="background:'+c.color+'"></div></div>';}
 
 function makePopup(m,cc){
   var c=CAT[m.cat]||{color:cc,icon:'📍'}, col=c.color;
@@ -920,7 +920,7 @@ function initMap(){
   var city=activeCity||'shanghai';
   sizeMapWrap();
   map=L.map('map',{zoomControl:true,touchZoom:false,tap:false,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false}).setView(cities[city].center,cities[city].zoom);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19,crossOrigin:true}).addTo(map);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB · © OSM',maxZoom:19,subdomains:'abcd'}).addTo(map);
   activeFilter='Todos';
   var RecenterCtrl=L.Control.extend({options:{position:'topleft'},onAdd:function(){var b=L.DomUtil.create('div','leaflet-bar leaflet-control');b.style.marginTop='5px';var btn=L.DomUtil.create('a','',b);btn.innerHTML='⊕';btn.title='Centrar';btn.href='#';btn.style.cssText='font-size:16px;line-height:30px;display:block;width:30px;height:30px;text-align:center;cursor:pointer;color:rgba(255,255,255,0.8)!important;background:rgba(14,4,4,0.92)!important';L.DomEvent.on(btn,'click',function(e){L.DomEvent.stopPropagation(e);L.DomEvent.preventDefault(e);sizeMapWrap();map.invalidateSize({animate:false,pan:false});var c=cities[activeCity];map.setView(c.center,c.zoom,{animate:true,duration:0.6});});return b;}});
   new RecenterCtrl().addTo(map);
