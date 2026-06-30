@@ -10,10 +10,10 @@
 :root{--gold:#f0b429;--blue:#4a9eff;--red:#ff4466;--orange:#ff8c42;--purple:#9b59b6;--green:#2ecc71;--bg:#0a0e1a;--bg2:#111827;--bg3:#1a2235;--border:rgba(255,255,255,0.08);--text:rgba(255,255,255,0.85);--muted:rgba(255,255,255,0.4)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-.nav{position:sticky;top:0;left:0;right:0;z-index:1000;background:rgba(10,14,26,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0;height:52px}
+.nav{position:sticky;top:0;left:0;right:0;z-index:1000;background:rgba(10,14,26,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0;height:52px;will-change:transform;contain:layout style paint}
 .nav-logo{padding:0 18px;font-size:14px;font-weight:700;color:var(--gold);white-space:nowrap;flex-shrink:0}
 .nav-logo span{color:rgba(255,255,255,0.5);font-weight:400}
-.nav-tabs{display:flex;overflow-x:auto;flex:1;scrollbar-width:none}
+.nav-tabs{display:flex;overflow-x:auto;flex:1;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .nav-tabs::-webkit-scrollbar{display:none}
 .ntab{padding:0 14px;height:52px;display:flex;align-items:center;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px;user-select:none}
 .ntab:hover{color:var(--text)}
@@ -46,7 +46,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .rv-label{font-size:8px;color:var(--muted);text-align:center}
 /* MAP */
 .map-page-header{padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px}
-.map-city-tabs{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.map-city-tabs{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .map-city-tabs::-webkit-scrollbar{display:none}
 .mctab{padding:7px 16px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--muted);transition:all .2s;user-select:none;white-space:nowrap;flex-shrink:0}
 .mctab:hover{color:var(--text);border-color:rgba(255,255,255,0.2)}
@@ -54,8 +54,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .map-filter-bar::-webkit-scrollbar{display:none}
 .mfilter{padding:4px 12px;border-radius:12px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.04);transition:all .2s;white-space:nowrap;flex-shrink:0;user-select:none}
 .mfilter.active,.mfilter:hover{color:#fff;background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25)}
-.map-wrap{height:calc(100vh - 52px - 108px);min-height:340px;position:relative}
-#map{height:100%;width:100%}
+.map-wrap{height:calc(100dvh - 52px - 108px);min-height:340px;position:relative;overflow:hidden}
+#map{height:100%;width:100%;touch-action:none}
 .map-pin-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5))}
 .map-pin-body{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;border:2px solid;transition:transform .15s;position:relative}
 .map-pin-body:hover{transform:scale(1.12)}
@@ -687,10 +687,21 @@ function showPage(id,el){
   document.querySelectorAll('.ntab').forEach(function(t){t.classList.remove('active');});
   document.getElementById('page-'+id).classList.add('active');
   if(el) el.classList.add('active');
-  if(id==='maps') setTimeout(function(){if(!map)initMap();else map.invalidateSize();},120);
+  if(id==='maps'){
+    setTimeout(function(){
+      if(!map){initMap();}
+      else{
+        var mapEl=document.getElementById('map');
+        void mapEl.offsetHeight; // force reflow before measuring
+        map.invalidateSize(true);
+      }
+    },200);
+  } else if(map){
+    map.off();map.remove();map=null;cityMarkers=[];
+  }
 }
-function toggleCity(id){var e=document.getElementById('days-'+id),a=document.getElementById('arr-'+id);e.classList.toggle('open');a.textContent=e.classList.contains('open')?'▼':'▶';}
-function toggleDay(id){var b=document.getElementById('body-'+id),t=document.getElementById('tog-'+id);b.classList.toggle('open');t.textContent=b.classList.contains('open')?'▼':'▶';}
+function toggleCity(id){var e=document.getElementById('days-'+id),a=document.getElementById('arr-'+id);e.classList.toggle('open');a.textContent=e.classList.contains('open')?'▼':'▶';if(map)setTimeout(function(){map.invalidateSize(true);},300);}
+function toggleDay(id){var b=document.getElementById('body-'+id),t=document.getElementById('tog-'+id);b.classList.toggle('open');t.textContent=b.classList.contains('open')?'▼':'▶';if(map)setTimeout(function(){map.invalidateSize(true);},300);}
 
 /* ── CATEGORIES ───────────────────────────────── */
 var CAT={'Imperdible':{color:'#f0b429',icon:'⭐'},'Historia':{color:'#e74c3c',icon:'🏛️'},'Naturaleza':{color:'#2ecc71',icon:'🌿'},'Shopping':{color:'#4a9eff',icon:'🛍️'},'Gastronomía':{color:'#ff8c42',icon:'🍜'},'Entretenimiento':{color:'#9b59b6',icon:'🎭'},'Hotel':{color:'#1abc9c',icon:'🏨'}};
@@ -779,6 +790,7 @@ function applyFilter(cat){activeFilter=cat;renderMarkers(activeCity);}
 function renderMarkers(city){
   if(!map) return;
   activeCity=city;
+  map.closePopup();
   cityMarkers.forEach(function(m){map.removeLayer(m);});
   cityMarkers=[];
   var c=cities[city];
@@ -796,11 +808,13 @@ function renderMarkers(city){
 }
 
 function initMap(){
-  if(map){map.invalidateSize();return;}
-  map=L.map('map',{zoomControl:true,touchZoom:false,tap:false,scrollWheelZoom:false}).setView([31.2304,121.4737],12);
+  if(map){map.invalidateSize(true);return;}
+  map=L.map('map',{zoomControl:true,touchZoom:false,tap:false,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false}).setView([31.2304,121.4737],12);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB · © OSM contributors',maxZoom:19}).addTo(map);
   activeFilter='Todos';
-  renderMarkers('shanghai');
+  renderMarkers(activeCity||'shanghai');
+  window.addEventListener('orientationchange',function(){setTimeout(function(){if(map)map.invalidateSize(true);},400);});
+  window.addEventListener('resize',function(){if(map)map.invalidateSize(true);});
 }
 
 function switchMap(city,el){
