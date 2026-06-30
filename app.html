@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nuestro Gran Tour — China & Corea 2026-2027</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--gold:#f0b429;--blue:#4a9eff;--red:#ff4466;--orange:#ff8c42;--purple:#9b59b6;--green:#2ecc71;--bg:#0a0e1a;--bg2:#111827;--bg3:#1a2235;--border:rgba(255,255,255,0.08);--text:rgba(255,255,255,0.85);--muted:rgba(255,255,255,0.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(10,14,26,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0;height:52px}
+.nav-logo{padding:0 18px;font-size:14px;font-weight:700;color:var(--gold);white-space:nowrap;flex-shrink:0}
+.nav-logo span{color:rgba(255,255,255,0.5);font-weight:400}
+.nav-tabs{display:flex;overflow-x:auto;flex:1;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.ntab{padding:0 14px;height:52px;display:flex;align-items:center;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px;user-select:none}
+.ntab:hover{color:var(--text)}
+.ntab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.page{display:none;padding-top:52px;min-height:100vh}
+.page.active{display:block}
+/* HOME */
+.hero{background:linear-gradient(135deg,#0a0e1a 0%,#0f1e35 50%,#1a0d2e 100%);padding:48px 24px 36px;text-align:center;position:relative;overflow:hidden}
+.hero-title{font-size:28px;font-weight:800;color:#fff;line-height:1.15;margin-bottom:8px}
+.hero-title em{color:var(--gold);font-style:normal}
+.hero-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.route-pills{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:24px}
+.rpill{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600}
+.rpill-dot{width:7px;height:7px;border-radius:50%}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:520px;margin:0 auto 24px}
+.stat-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 10px;text-align:center}
+.stat-v{font-size:22px;font-weight:800;color:#fff;line-height:1}
+.stat-l{font-size:9px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.alert-box{background:rgba(230,126,34,0.1);border:1px solid rgba(230,126,34,0.3);border-radius:12px;padding:14px 18px;max-width:560px;margin:0 auto}
+.alert-title{font-size:12px;font-weight:700;color:#e67e22;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.alert-text{font-size:11px;color:rgba(255,255,255,0.65);line-height:1.6}
+.route-visual{display:flex;align-items:center;padding:20px 24px;overflow-x:auto;gap:0;background:var(--bg2);border-bottom:1px solid var(--border)}
+.rv-city{text-align:center;min-width:80px;flex-shrink:0}
+.rv-dot{width:12px;height:12px;border-radius:50%;border:2px solid;margin:0 auto 6px}
+.rv-code{font-size:13px;font-weight:800}
+.rv-name{font-size:9px;color:var(--muted);margin-top:2px}
+.rv-date{font-size:9px;margin-top:3px;font-weight:600}
+.rv-line{flex:1;min-width:30px;display:flex;flex-direction:column;align-items:center;gap:3px;padding-top:5px}
+.rv-arrow{width:100%;height:2px;background:linear-gradient(90deg,transparent,rgba(240,180,41,0.4),transparent)}
+.rv-label{font-size:8px;color:var(--muted);text-align:center}
+/* MAP */
+.map-page-header{padding:16px 20px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.map-city-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.mctab{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--muted);transition:all .2s;user-select:none}
+.mctab:hover{color:var(--text)}
+.map-wrap{height:calc(100vh - 52px - 70px);min-height:380px;position:relative}
+#map{height:100%;width:100%}
+.map-legend{position:absolute;bottom:12px;left:12px;z-index:999;background:rgba(10,14,26,0.92);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px 12px;pointer-events:none;max-width:200px}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:10px;color:rgba(255,255,255,0.7);margin-bottom:4px}
+.leg-item:last-child{margin-bottom:0}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+/* ITINERARY */
+.city-header{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);cursor:pointer;position:sticky;top:52px;z-index:10;transition:filter .2s}
+.city-header:hover{filter:brightness(1.1)}
+.ch-flag{font-size:22px}
+.ch-info{flex:1}
+.ch-title{font-size:15px;font-weight:700;color:#fff}
+.ch-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.ch-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;letter-spacing:.5px}
+.ch-arrow{font-size:14px;color:var(--muted);transition:transform .3s;min-width:16px;text-align:center}
+.city-days{display:none}
+.city-days.open{display:block}
+.day-card{border-bottom:1px solid var(--border)}
+.day-header{padding:14px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;background:var(--bg2);transition:background .2s;user-select:none}
+.day-header:hover{background:var(--bg3)}
+.day-num{font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px;white-space:nowrap;flex-shrink:0}
+.day-title-wrap{flex:1}
+.day-title{font-size:13px;font-weight:600;color:#fff}
+.day-date{font-size:10px;color:var(--muted);margin-top:2px}
+.day-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.dtag{font-size:9px;padding:2px 7px;border-radius:6px;font-weight:600}
+.day-toggle{color:var(--muted);font-size:12px;min-width:16px;text-align:center}
+.day-body{display:none;padding:0 20px 18px;background:var(--bg)}
+.day-body.open{display:block}
+.tl{position:relative;padding-left:24px;padding-top:14px}
+.tl::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:1.5px;background:linear-gradient(to bottom,var(--accent,#4a9eff),transparent)}
+.tl-item{position:relative;margin-bottom:18px}
+.tl-item::before{content:'';position:absolute;left:-21px;top:5px;width:9px;height:9px;border-radius:50%;border:2px solid var(--accent,#4a9eff);background:var(--bg)}
+.tl-time{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px}
+.tl-place{font-size:13px;font-weight:700;color:#fff;margin-bottom:4px}
+.tl-desc{font-size:11px;color:rgba(255,255,255,0.6);line-height:1.7}
+.tip-box{background:rgba(255,255,255,0.04);border-left:2px solid var(--accent,#4a9eff);border-radius:0 8px 8px 0;padding:8px 12px;margin-top:8px}
+.tip-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent,#4a9eff);margin-bottom:3px}
+.tip-text{font-size:11px;color:rgba(255,255,255,0.55);line-height:1.6}
+/* SHOPPING */
+.shop-section{padding:18px 20px}
+.shop-city-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.shop-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px}
+.shop-icon{font-size:20px;margin-bottom:6px}
+.shop-name{font-size:12px;font-weight:700;color:#fff;margin-bottom:3px}
+.shop-type{font-size:9px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;font-weight:600}
+.shop-desc{font-size:10px;color:rgba(255,255,255,0.5);line-height:1.5}
+/* TIPS */
+.tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:18px 20px}
+.tip-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px}
+.tc-icon{font-size:22px;margin-bottom:8px}
+.tc-title{font-size:12px;font-weight:700;color:#fff;margin-bottom:6px}
+.tc-text{font-size:11px;color:rgba(255,255,255,0.55);line-height:1.6}
+.tc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tc-tag{font-size:9px;padding:2px 8px;border-radius:8px;font-weight:600;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6)}
+.section-title{font-size:13px;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1.5px;padding:18px 20px 12px;border-bottom:1px solid var(--border)}
+/* LEAFLET */
+.leaflet-container{background:#1a2235}
+.leaflet-popup-content-wrapper{background:#1a2235;border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.5)}
+.leaflet-popup-tip{background:#1a2235}
+.leaflet-popup-content{margin:12px 14px;font-size:12px}
+.popup-title{font-weight:700;color:#fff;font-size:13px;margin-bottom:4px}
+.popup-sub{color:rgba(255,255,255,0.5);font-size:11px}
+.popup-day{display:inline-block;margin-top:6px;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:.5px}
+@media(max-width:480px){.stats-grid{grid-template-columns:repeat(2,1fr)}.shop-grid{grid-template-columns:1fr}.tips-grid{grid-template-columns:1fr}}
+@keyframes pulse{0%{transform:scale(1);opacity:.5}100%{transform:scale(2.2);opacity:0}}
+.route-tooltip{background:rgba(10,14,26,0.95)!important;border:1px solid rgba(255,255,255,0.12)!important;border-radius:8px!important;color:#fff!important;font-size:11px!important;padding:6px 10px!important;box-shadow:0 4px 16px rgba(0,0,0,0.5)!important}
+.route-tooltip::before{border-top-color:rgba(255,255,255,0.12)!important}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-logo">✈ <span>Nuestro</span> Gran Tour 2027</div>
+  <div class="nav-tabs">
+    <div class="ntab active" onclick="showPage('home',this)">🏠 Inicio</div>
+    <div class="ntab" onclick="showPage('maps',this)">🗺️ Mapas</div>
+    <div class="ntab" onclick="showPage('itinerary',this)">📅 Itinerario</div>
+    <div class="ntab" onclick="showPage('shopping',this)">🛍️ Shopping</div>
+    <div class="ntab" onclick="showPage('tips',this)">💡 Tips</div>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div style="font-size:36px;margin-bottom:12px">🇨🇳 🇰🇷</div>
+    <div class="hero-title">Gran Tour<br><em>China & Corea</em> 2026</div>
+    <div class="hero-sub">28 Diciembre 2026 → 14 Enero 2027 · 5 viajeros · 4 ciudades</div>
+    <div class="route-pills">
+      <div class="rpill"><div class="rpill-dot" style="background:#aaa"></div><span style="color:#aaa">MEX</span></div>
+      <div style="color:rgba(255,255,255,0.3);font-size:11px">→</div>
+      <div class="rpill"><div class="rpill-dot" style="background:#4a9eff"></div><span style="color:#4a9eff">Shanghai</span></div>
+      <div style="color:rgba(255,255,255,0.3);font-size:11px">🚄</div>
+      <div class="rpill"><div class="rpill-dot" style="background:#ff8c42"></div><span style="color:#ff8c42">Xi'an</span></div>
+      <div style="color:rgba(255,255,255,0.3);font-size:11px">🚄</div>
+      <div class="rpill"><div class="rpill-dot" style="background:#ff4466"></div><span style="color:#ff4466">Beijing</span></div>
+      <div style="color:rgba(255,255,255,0.3);font-size:11px">✈</div>
+      <div class="rpill"><div class="rpill-dot" style="background:#9b59b6"></div><span style="color:#9b59b6">Seúl</span></div>
+      <div style="color:rgba(255,255,255,0.3);font-size:11px">→</div>
+      <div class="rpill"><div class="rpill-dot" style="background:#aaa"></div><span style="color:#aaa">MEX</span></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-v" style="color:var(--gold)">17</div><div class="stat-l">Noches</div></div>
+      <div class="stat-card"><div class="stat-v" style="color:var(--blue)">4</div><div class="stat-l">Ciudades</div></div>
+      <div class="stat-card"><div class="stat-v" style="color:var(--red)">2</div><div class="stat-l">Parques</div></div>
+      <div class="stat-card"><div class="stat-v" style="color:var(--green)">1</div><div class="stat-l">NYE épico</div></div>
+    </div>
+    <div class="alert-box">
+      <div class="alert-title">⚠️ Acción requerida — Visa China</div>
+      <div class="alert-text">Los ciudadanos mexicanos <strong>necesitan visa China tipo L</strong> para China continental. Tramitar en la Embajada China en CDMX a partir de <strong>octubre 2026</strong>. Costo: ~$140 USD por persona × 5 = <strong>$700 USD total</strong>. Proceso tarda 7–10 días hábiles. Corea del Sur: <strong>sin visa</strong> para mexicanos ✅</div>
+    </div>
+  </div>
+  <!-- MAPA RUTA INICIO -->
+  <div style="position:relative;border-bottom:1px solid var(--border)">
+    <div style="position:absolute;top:12px;left:12px;z-index:999;background:rgba(10,14,26,0.9);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 14px;pointer-events:none">
+      <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Ruta del viaje</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#4a9eff;flex-shrink:0"></div>Shanghai · 30 Dic–3 Ene</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#ff8c42;flex-shrink:0"></div>Xi'an · 3–5 Ene</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#ff4466;flex-shrink:0"></div>Beijing · 5–10 Ene</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#9b59b6;flex-shrink:0"></div>Seúl · 10–14 Ene</div>
+        <div style="margin-top:4px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);font-size:9px;color:rgba(255,255,255,0.35)">— — — tren bala &nbsp;&nbsp; ✈ vuelo</div>
+      </div>
+    </div>
+    <div id="home-map" style="height:380px;width:100%"></div>
+  </div>
+
+  <div class="route-visual">
+    <div class="rv-city"><div class="rv-dot" style="border-color:#aaa;background:#0a0e1a"></div><div class="rv-code" style="color:#aaa">MEX</div><div class="rv-name">Ciudad de México</div><div class="rv-date" style="color:#aaa">28 Dic · 8pm</div></div>
+    <div class="rv-line"><div class="rv-arrow"></div><div class="rv-label">✈ 14h</div></div>
+    <div class="rv-city"><div class="rv-dot" style="border-color:#4a9eff;background:rgba(74,158,255,0.2)"></div><div class="rv-code" style="color:#4a9eff">PVG</div><div class="rv-name">Shanghai</div><div class="rv-date" style="color:#4a9eff">30 Dic–3 Ene</div></div>
+    <div class="rv-line"><div class="rv-arrow"></div><div class="rv-label">🚄 5.5h</div></div>
+    <div class="rv-city"><div class="rv-dot" style="border-color:#ff8c42;background:rgba(255,140,66,0.2)"></div><div class="rv-code" style="color:#ff8c42">XIY</div><div class="rv-name">Xi'an</div><div class="rv-date" style="color:#ff8c42">3–5 Ene</div></div>
+    <div class="rv-line"><div class="rv-arrow"></div><div class="rv-label">🚄 4.5h</div></div>
+    <div class="rv-city"><div class="rv-dot" style="border-color:#ff4466;background:rgba(255,68,102,0.2)"></div><div class="rv-code" style="color:#ff4466">PEK</div><div class="rv-name">Beijing</div><div class="rv-date" style="color:#ff4466">5–10 Ene</div></div>
+    <div class="rv-line"><div class="rv-arrow"></div><div class="rv-label">✈ 2h</div></div>
+    <div class="rv-city"><div class="rv-dot" style="border-color:#9b59b6;background:rgba(155,89,182,0.2)"></div><div class="rv-code" style="color:#9b59b6">ICN</div><div class="rv-name">Seúl</div><div class="rv-date" style="color:#9b59b6">10–14 Ene</div></div>
+    <div class="rv-line"><div class="rv-arrow"></div><div class="rv-label">✈ regreso</div></div>
+    <div class="rv-city"><div class="rv-dot" style="border-color:#aaa;background:#0a0e1a"></div><div class="rv-code" style="color:#aaa">MEX</div><div class="rv-name">Ciudad de México</div><div class="rv-date" style="color:#aaa">14 Ene · 11:40am</div></div>
+  </div>
+  <div class="section-title">👨‍👩‍👧‍👦 Viajeros</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px 20px">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;text-align:center;min-width:110px"><div style="font-size:22px">🕺</div><div style="font-size:12px;font-weight:700;margin-top:4px">Luis Angel</div><div style="font-size:10px;color:var(--muted)">El jefe del viaje</div></div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;text-align:center;min-width:110px"><div style="font-size:22px">💃</div><div style="font-size:12px;font-weight:700;margin-top:4px">Patricia</div><div style="font-size:10px;color:var(--muted)">La reina del shopping</div></div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;text-align:center;min-width:110px"><div style="font-size:22px">✨</div><div style="font-size:12px;font-weight:700;margin-top:4px">Madeleine</div><div style="font-size:10px;color:var(--muted)">29 años</div></div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;text-align:center;min-width:110px"><div style="font-size:22px">🎯</div><div style="font-size:12px;font-weight:700;margin-top:4px">Alfredo</div><div style="font-size:10px;color:var(--muted)">28 años</div></div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;text-align:center;min-width:110px"><div style="font-size:22px">🚀</div><div style="font-size:12px;font-weight:700;margin-top:4px">Luis Eduardo</div><div style="font-size:10px;color:var(--muted)">26 años</div></div>
+  </div>
+</div>
+
+<!-- MAPS -->
+<div class="page" id="page-maps">
+  <div class="map-page-header">
+    <div style="font-size:14px;font-weight:700;color:#fff">Mapa Interactivo</div>
+    <div class="map-city-tabs">
+      <div class="mctab active" style="background:rgba(74,158,255,0.2);border-color:#4a9eff;color:#4a9eff" onclick="switchMap('shanghai',this)">🇨🇳 Shanghai</div>
+      <div class="mctab" onclick="switchMap('xian',this)">🏺 Xi'an</div>
+      <div class="mctab" onclick="switchMap('beijing',this)">🏯 Beijing</div>
+      <div class="mctab" onclick="switchMap('seoul',this)">🇰🇷 Seúl</div>
+    </div>
+  </div>
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="map-legend" id="map-legend"></div>
+  </div>
+</div>
+
+<!-- ITINERARY -->
+<div class="page" id="page-itinerary">
+
+  <!-- SHANGHAI -->
+  <div class="city-section">
+    <div class="city-header" style="background:rgba(74,158,255,0.06)" onclick="toggleCity('sh')">
+      <div class="ch-flag">🇨🇳</div>
+      <div class="ch-info">
+        <div class="ch-title">Shanghai — 上海</div>
+        <div class="ch-sub">30 Dic 2026 – 3 Ene 2027 · 4 noches · NYE en The Bund + Shanghai Disney</div>
+      </div>
+      <div class="ch-badge" style="background:rgba(74,158,255,0.15);color:#4a9eff">4N</div>
+      <div class="ch-arrow" id="arr-sh">▼</div>
+    </div>
+    <div class="city-days open" id="days-sh">
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d1')">
+          <div class="day-num" style="background:rgba(74,158,255,0.15);color:#4a9eff">DÍA 1</div>
+          <div class="day-title-wrap">
+            <div class="day-title">✈ Llegada a Shanghai</div>
+            <div class="day-date">Miércoles 30 de diciembre, 2026</div>
+            <div class="day-tags"><span class="dtag" style="background:rgba(74,158,255,0.15);color:#4a9eff">Vuelo ICN→PVG</span><span class="dtag" style="background:rgba(240,180,41,0.15);color:var(--gold)">Nanjing Road</span></div>
+          </div>
+          <div class="day-toggle" id="tog-d1">▶</div>
+        </div>
+        <div class="day-body" id="body-d1">
+          <div class="tl" style="--accent:#4a9eff">
+            <div class="tl-item"><div class="tl-time">7:00am – 9:30am</div><div class="tl-place">✈ Vuelo ICN → PVG (Shanghai Pudong)</div><div class="tl-desc">~2h de vuelo. Al aterrizar: tomar el <strong>Maglev</strong> (tren magnético a 431 km/h, ¥55, solo 8 minutos) hasta Longyang Rd, luego metro al hotel. Primera y más veloz experiencia terrestre del mundo.</div><div class="tip-box"><div class="tip-title">💡 No se lo pierdan</div><div class="tip-text">El Maglev es el tren de pasajeros más rápido del mundo. No tomen taxi directo del aeropuerto solo para no perderse esto.</div></div></div>
+            <div class="tl-item"><div class="tl-time">11:00am – 1:30pm</div><div class="tl-place">🏨 Check-in + Almuerzo Din Tai Fung IFC Mall</div><div class="tl-desc">Los xiao long bao (dumplings de sopa) más famosos del mundo. Pedir: xiao long bao de cerdo y trufa, dim sum de camarones, arroz con huevo frito. Referencia: Din Tai Fung IFC Mall, B2.</div></div>
+            <div class="tl-item"><div class="tl-time">2:00pm – 6:00pm</div><div class="tl-place">🛍 Nanjing Road Peatonal (南京路步行街)</div><div class="tl-desc">5.5km, 600+ tiendas. Primer contacto con el comercio chino. Street food al caminar: bao caliente, taro mochi, leche de soja. Llegar al Bund al atardecer para ver el skyline de Pudong iluminarse.</div></div>
+            <div class="tl-item"><div class="tl-time">7:30pm</div><div class="tl-place">🍜 Cena bienvenida — Lost Heaven (天堂) · The Bund</div><div class="tl-desc">Cocina Yunnan con vistas al Bund. Platos reveladores: pollo con flores de peonía, queso de Yunnan frito, cerdo con hierbas de montaña. Reservar en eatigo.com con anticipación.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d2')">
+          <div class="day-num" style="background:rgba(74,158,255,0.15);color:#4a9eff">DÍA 2</div>
+          <div class="day-title-wrap">
+            <div class="day-title">🎆 NOCHEVIEJA — The Bund</div>
+            <div class="day-date">Jueves 31 de diciembre, 2026</div>
+            <div class="day-tags"><span class="dtag" style="background:rgba(240,180,41,0.2);color:var(--gold)">⭐ El momento del viaje</span></div>
+          </div>
+          <div class="day-toggle" id="tog-d2">▶</div>
+        </div>
+        <div class="day-body" id="body-d2">
+          <div class="tl" style="--accent:#f0b429">
+            <div class="tl-item"><div class="tl-time">9:00am – 11:30am</div><div class="tl-place">🏮 Yu Garden (豫园) + Bazar</div><div class="tl-desc">Jardín clásico del s.XVI con el Dragón del Muro. Bazar exterior para souvenirs: jade, seda, abanicos, caligrafía. Llegar a las 9am para evitar multitudes. <strong>Nanxiang Steamed Bun</strong> frente al jardín — los xiao long bao más históricos de Shanghai (desde 1900).</div></div>
+            <div class="tl-item"><div class="tl-time">12:00pm – 3:00pm</div><div class="tl-place">🌿 French Concession (法租界)</div><div class="tl-desc">El barrio más cool de Shanghai. Árboles de plátano centenarios, mansiones Art Déco. <strong>Wukang Road</strong>: la calle más fotogénica de Shanghai. Almuerzo en Egg (brunch en edificio colonial).</div></div>
+            <div class="tl-item"><div class="tl-time">4:00pm – 11:59pm ⭐</div><div class="tl-place">THE BUND — NOCHEVIEJA 2026→2027</div><div class="tl-desc">Llegar a las 4pm para buen lugar en el paseo (1.5km frente al río Huangpu). <strong>Opción premium</strong>: M on the Bund, piso 7, menú NYE fijo ~$120 USD — reservar en octubre 2026. A las 12:00am: espectáculo de luces en Shanghai Tower, láseres sobre el río, fuegos artificiales. <strong>Uno de los 5 mejores NYE del mundo.</strong></div><div class="tip-box"><div class="tip-title">⚠️ Plan post-medianoche</div><div class="tip-text">Multitud masiva post-conteo. No intentar metro hasta 1:30-2am. Caminar hacia Xintiandi o DiDi. Bar Rouge en The Bund — el más icónico de Shanghai.</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d3')">
+          <div class="day-num" style="background:rgba(74,158,255,0.15);color:#4a9eff">DÍA 3</div>
+          <div class="day-title-wrap">
+            <div class="day-title">🏰 Shanghai Disney Resort</div>
+            <div class="day-date">Viernes 1 de enero, 2027 — ¡Año Nuevo!</div>
+            <div class="day-tags"><span class="dtag" style="background:rgba(255,68,102,0.2);color:var(--red)">DÍA COMPLETO</span><span class="dtag" style="background:rgba(155,89,182,0.15);color:var(--purple)">TRON + Zootopia únicos en el mundo</span></div>
+          </div>
+          <div class="day-toggle" id="tog-d3">▶</div>
+        </div>
+        <div class="day-body" id="body-d3">
+          <div class="tl" style="--accent:#ff4466">
+            <div class="tl-item"><div class="tl-time">8:30am</div><div class="tl-place">🚇 Metro L11 directo → Disney (55 min)</div><div class="tl-desc">Desde People's Square. Llegar antes de apertura a las 9am. Lightning Lane Multi Pass: comprar desde la app Disney Parks ANTES del viaje.</div></div>
+            <div class="tl-item"><div class="tl-time">9:00am — PRIORIDAD 1</div><div class="tl-place">🚀 TRON Lightcycle Run</div><div class="tl-desc">La montaña rusa más emocionante de todos los Disney del mundo. Lanzamiento a 100 km/h sobre motos de luz. <strong>Original aquí — mejor que la de Florida.</strong> Ir en cuanto abre el parque.</div></div>
+            <div class="tl-item"><div class="tl-time">PRIORIDAD 2</div><div class="tl-place">🦊 Zootopia: Hot Pursuit — ÚNICA EN EL MUNDO</div><div class="tl-desc">Solo existe en Shanghai Disney. Inaugurada 2023. Tecnología de 360°, aromas, efectos táctiles, personajes holográficos. Muchos fans de Disney viajan desde EUA solo para esta atracción.</div></div>
+            <div class="tl-item"><div class="tl-time">También</div><div class="tl-place">Pirates of Caribbean · Fantasyland · Toy Story</div><div class="tl-desc">Pirates aquí es barco con efectos espectaculares sin drops bruscos — perfecto para Luis Angel y Patricia. El castillo Enchanted Storybook es el MÁS GRANDE de todos los Disney del mundo.</div></div>
+            <div class="tl-item"><div class="tl-time">8:00pm</div><div class="tl-place">✨ Ignite the Dream — Show de Año Nuevo</div><div class="tl-desc">Proyecciones en el castillo, fuentes, drones y fuegos artificiales especiales de Año Nuevo. Posicionarse 45 min antes frente al castillo.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d4')">
+          <div class="day-num" style="background:rgba(74,158,255,0.15);color:#4a9eff">DÍA 4</div>
+          <div class="day-title-wrap">
+            <div class="day-title">🌆 The Bund de Día + Shopping Intenso</div>
+            <div class="day-date">Sábado 2 de enero, 2027</div>
+            <div class="day-tags"><span class="dtag" style="background:rgba(74,158,255,0.15);color:var(--blue)">Mercado de Perlas</span><span class="dtag" style="background:rgba(240,180,41,0.15);color:var(--gold)">Shanghai Tower mirador</span></div>
+          </div>
+          <div class="day-toggle" id="tog-d4">▶</div>
+        </div>
+        <div class="day-body" id="body-d4">
+          <div class="tl" style="--accent:#4a9eff">
+            <div class="tl-item"><div class="tl-time">9:00am</div><div class="tl-place">🌅 The Bund de día + Ferry al Pudong</div><div class="tl-desc">El Bund de día es completamente diferente. Ferry (¥2, 10 min) al Pudong para ver los rascacielos desde el agua. Subir al mirador piso 100 de Shanghai Tower (¥180) — la vista más alta de China.</div></div>
+            <div class="tl-item"><div class="tl-time">12:00pm – 7:00pm</div><div class="tl-place">🛍 Tianzifang → Plaza 66 / IAPM → Mercado de Perlas</div><div class="tl-desc"><strong>Tianzifang</strong> (12-2pm): Callejones artísticos, seda, cerámica local original. Todo auténtico, sin copias.<br><br><strong>Plaza 66 / IAPM</strong> (2-4pm): LV, Gucci, Hermès. Ediciones exclusivas Asia no disponibles en México.<br><br><strong>Mercado de Perlas</strong> (4-7pm, metro Science Museum): 4 pisos — electrónicos, jade, bisutería, bolsas. Ofrecer el 30% del precio inicial.</div></div>
+            <div class="tl-item"><div class="tl-time">7:30pm</div><div class="tl-place">🌃 Cena Xintiandi · Preparar viaje a Xi'an</div><div class="tl-desc">Crystal Jade en Xintiandi (cocina cantonesa premium). Preparar maletas — mañana tren bala a Xi'an desde Shanghai Hongqiao Station.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- XI'AN -->
+  <div class="city-section">
+    <div class="city-header" style="background:rgba(255,140,66,0.06)" onclick="toggleCity('xi')">
+      <div class="ch-flag">🏺</div>
+      <div class="ch-info">
+        <div class="ch-title">Xi'an — 西安</div>
+        <div class="ch-sub">3 – 5 Enero · 2 noches · Terracota + Muralla + Muslim Quarter</div>
+      </div>
+      <div class="ch-badge" style="background:rgba(255,140,66,0.15);color:#ff8c42">2N</div>
+      <div class="ch-arrow" id="arr-xi">▼</div>
+    </div>
+    <div class="city-days open" id="days-xi">
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d5')">
+          <div class="day-num" style="background:rgba(255,140,66,0.15);color:#ff8c42">DÍA 5</div>
+          <div class="day-title-wrap"><div class="day-title">🚄 Tren Bala + Muslim Quarter de Noche</div><div class="day-date">Domingo 3 de enero, 2027</div></div>
+          <div class="day-toggle" id="tog-d5">▶</div>
+        </div>
+        <div class="day-body" id="body-d5">
+          <div class="tl" style="--accent:#ff8c42">
+            <div class="tl-item"><div class="tl-time">7:30am</div><div class="tl-place">🚄 Shanghai Hongqiao → Xi'an North (G-tren, ~5.5h)</div><div class="tl-desc">Clase Business recomendada (~¥700, como primera clase aérea). Reservar en Trip.com con anticipación. Paisaje impresionante al cruzar las llanuras del centro de China.</div></div>
+            <div class="tl-item"><div class="tl-time">2:00pm</div><div class="tl-place">🏨 Llegada + Check-in dentro de la muralla</div><div class="tl-desc">De Xi'an North: Metro L14 (~30 min) al centro histórico rodeado por la muralla del s.XIV. Hotel recomendado: Sofitel Legend People's Grand o Grand Mercure.</div></div>
+            <div class="tl-item"><div class="tl-time">5:00pm – 10:00pm</div><div class="tl-place">🕌 Muslim Quarter (回民街 Huimin Jie)</div><div class="tl-desc">1,200 años de historia islámica china. Linternas rojas, humo de parrillas, cientos de puestos. <strong>PROBAR OBLIGATORIO:</strong> Roujiamo (el "hamburger" chino, el mejor de toda China, ~$1 USD), Yang Rou Pao Mo (caldo de cordero con pan), Biang-biang noodles (los más anchos del mundo), granadas frescas.<br><br><strong>Shopping:</strong> soldados terracota miniatura (~¥20-50), té pu-erh prensado, especias de la Ruta de la Seda, seda Xi'an.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d6')">
+          <div class="day-num" style="background:rgba(255,140,66,0.15);color:#ff8c42">DÍA 6</div>
+          <div class="day-title-wrap">
+            <div class="day-title">⚔️ Guerreros de Terracota + 🚴 Muralla Histórica</div>
+            <div class="day-date">Lunes 4 de enero, 2027</div>
+            <div class="day-tags"><span class="dtag" style="background:rgba(255,68,102,0.15);color:var(--red)">UNESCO</span><span class="dtag" style="background:rgba(46,204,113,0.15);color:var(--green)">Carrito eléctrico disponible</span></div>
+          </div>
+          <div class="day-toggle" id="tog-d6">▶</div>
+        </div>
+        <div class="day-body" id="body-d6">
+          <div class="tl" style="--accent:#ff8c42">
+            <div class="tl-item"><div class="tl-time">8:00am – 12:30pm</div><div class="tl-place">⚔️ Museo Guerreros de Terracota (兵马俑)</div><div class="tl-desc">8,000 soldados de terracota del 210 a.C. — cada uno con cara única. Llegar a las 8am exacto. Ruta: <strong>Fosa 1</strong> (250×60m, la más impresionante) → <strong>Fosa 2</strong> (excavación activa, ver arqueólogos trabajar) → <strong>Fosa 3</strong> (generales) → <strong>Museo del Carro Imperial</strong> (carros de bronce a escala). Tiempo: 3.5-4h.<br><br><em>Dato fascinante: solo el 25% ha sido excavado — el resto sigue bajo tierra esperando tecnología para preservar los colores originales.</em></div><div class="tip-box"><div class="tip-title">👴 Accesibilidad</div><div class="tip-text">Espacios amplios y planos. Carritos de golf disponibles (~¥50). La Fosa 1 tiene rampas. Luis Angel y Patricia pueden ver todo sin problema.</div></div></div>
+            <div class="tl-item"><div class="tl-time">12:30pm</div><div class="tl-place">🥟 Dumpling Banquet — De Fa Chang</div><div class="tl-desc">Cada dumpling tiene forma de animal o flor de la cocina imperial Tang. ~¥150 por persona (~$20 USD). Una de las experiencias gastronómicas más singulares de China.</div></div>
+            <div class="tl-item"><div class="tl-time">2:30pm – 5:30pm</div><div class="tl-place">🚴 Muralla de Xi'an (西安城墙)</div><div class="tl-desc">14km totales, la muralla del s.XIV más grande del mundo completamente intacta y 10 metros de ancho en la cima.<br><br><strong>Luis Angel y Patricia:</strong> carrito eléctrico que hace la vuelta completa (~¥120, 45 min, sin esfuerzo).<br><strong>Jóvenes:</strong> bicicleta (~¥45/hora, vuelta en 2h). El atardecer desde la muralla con la ciudad iluminándose — imagen permanente.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BEIJING -->
+  <div class="city-section">
+    <div class="city-header" style="background:rgba(255,68,102,0.06)" onclick="toggleCity('bj')">
+      <div class="ch-flag">🏯</div>
+      <div class="ch-info">
+        <div class="ch-title">Beijing — 北京</div>
+        <div class="ch-sub">5 – 10 Enero · 5 noches · Gran Muralla + Universal Studios + Ciudad Prohibida</div>
+      </div>
+      <div class="ch-badge" style="background:rgba(255,68,102,0.15);color:#ff4466">5N</div>
+      <div class="ch-arrow" id="arr-bj">▼</div>
+    </div>
+    <div class="city-days open" id="days-bj">
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d7')"><div class="day-num" style="background:rgba(255,68,102,0.15);color:#ff4466">DÍA 7</div><div class="day-title-wrap"><div class="day-title">🚄 Llegada Beijing + Wangfujing + Pato Pekín</div><div class="day-date">Martes 5 de enero, 2027</div></div><div class="day-toggle" id="tog-d7">▶</div></div>
+        <div class="day-body" id="body-d7">
+          <div class="tl" style="--accent:#ff4466">
+            <div class="tl-item"><div class="tl-time">Mañana</div><div class="tl-place">🚄 Xi'an North → Beijing West (G-tren, ~4.5h)</div><div class="tl-desc">Salir temprano. Clase Business ~¥800-900. Llegada: Metro L9 al hotel.</div></div>
+            <div class="tl-item"><div class="tl-time">2:00pm – 6:30pm</div><div class="tl-place">🛍 Wangfujing (王府井) + Mercado de Snacks Exóticos</div><div class="tl-desc">La calle comercial más famosa de Beijing. El Mercado de Snacks: estrellas de mar, escorpiones, grillos en brocheta — los valientes tendrán historia para siempre. También: brochetas de carne, tofu frito, jianbing. Tongrentang (farmacia china de 350 años) para tés medicinales de regalo.</div></div>
+            <div class="tl-item"><div class="tl-time">7:30pm</div><div class="tl-place">🦆 Pato Pekín — Quanjude Wangfujing (1864)</div><div class="tl-desc">El restaurante de pato más famoso e histórico del mundo. El pato se hornea en leña de madera frutal, lo cortan en mesa con técnica centenaria y dan un certificado numerado. ¥400-600 para los 5. Reservar directamente al llegar a Beijing.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d8')"><div class="day-num" style="background:rgba(255,68,102,0.15);color:#ff4466">DÍA 8</div><div class="day-title-wrap"><div class="day-title">🧱 GRAN MURALLA CHINA — Sección Mutianyu</div><div class="day-date">Miércoles 6 de enero, 2027</div><div class="day-tags"><span class="dtag" style="background:rgba(240,180,41,0.2);color:var(--gold)">⭐ El momento más icónico</span><span class="dtag" style="background:rgba(74,158,255,0.15);color:var(--blue)">Teleférico + Tobogán</span></div></div><div class="day-toggle" id="tog-d8">▶</div></div>
+        <div class="day-body" id="body-d8">
+          <div class="tl" style="--accent:#f0b429">
+            <div class="tl-item"><div class="tl-time">6:30am</div><div class="tl-place">⏰ Desayuno + Tour privado contratado</div><div class="tl-desc">Tour privado para los 5 (~$200-250 USD total, incluye transporte y guía bilingüe). Mucho mejor que tour grupal para el ritmo multigeneracional del grupo. Llevar: ropa térmica, guantes, bufanda, tenis con agarre. En enero puede haber nieve — prepárense para la imagen más épica del viaje.</div></div>
+            <div class="tl-item"><div class="tl-time">9:00am – 1:30pm</div><div class="tl-place">🧱 Gran Muralla — Mutianyu (慕田峪)</div><div class="tl-desc"><strong>Por qué Mutianyu y no Badaling:</strong> 30-40% menos turistas, mejor conservada (restauración fiel al s.XV), paisaje más dramático.<br><br><strong>🚡 Teleférico de subida</strong> (¥55, 8 min): Luis Angel y Patricia llegan sin esfuerzo.<br><br><strong>En la muralla:</strong> caminar entre Torres 6 y 23 (~2km). Torres con ventanas de tiro de flechas y plataformas de observación.<br><br><strong>🛷 Tobogán de bajada:</strong> pista de acero por la montaña, control manual de velocidad. Los jóvenes van a adorarlo. Padres: teleférico de bajada.</div><div class="tip-box"><div class="tip-title">❄️ Si hay nieve en enero</div><div class="tip-text">La Gran Muralla nevada es la imagen más icónica de China — serpentea entre montañas blancas. No cancelar por frío. Las fotos van a durar toda la vida.</div></div></div>
+            <div class="tl-item"><div class="tl-time">2:00pm</div><div class="tl-place">🍕 Almuerzo — Schoolhouse at Mutianyu</div><div class="tl-desc">El restaurante más famoso al pie de Mutianyu. Pizza de horno de leña, hamburguesas artesanales, cerveza Great Wall Wheat. Vista a la muralla desde las mesas.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d9')"><div class="day-num" style="background:rgba(255,68,102,0.15);color:#ff4466">DÍA 9</div><div class="day-title-wrap"><div class="day-title">🏛️ Ciudad Prohibida + Tiananmen + Templo del Cielo</div><div class="day-date">Jueves 7 de enero, 2027</div><div class="day-tags"><span class="dtag" style="background:rgba(255,68,102,0.15);color:var(--red)">UNESCO</span></div></div><div class="day-toggle" id="tog-d9">▶</div></div>
+        <div class="day-body" id="body-d9">
+          <div class="tl" style="--accent:#ff4466">
+            <div class="tl-item"><div class="tl-time">8:30am</div><div class="tl-place">🏟 Plaza Tiananmen (天安门广场)</div><div class="tl-desc">440,000 m² — la plaza más grande del mundo. Mausoleo de Mao (cuerpo embalsamado, gratis antes de las 11am). Foto frente al retrato de Mao — imagen icónica del viaje. ⚠️ Tickets Ciudad Prohibida: comprar ONLINE en tickets.dpm.org.cn con mínimo 2 semanas de anticipación (¥60 pp).</div></div>
+            <div class="tl-item"><div class="tl-time">9:00am – 1:00pm</div><div class="tl-place">🏛️ Ciudad Prohibida (故宫 Gugong)</div><div class="tl-desc">980 edificios, 9,000 habitaciones, 500 años de historia imperial. Ruta: Meridian Gate → Sala Armonía Suprema → Armonía Central → Pureza Celestial → Jardín Imperial. App "Digital Palace Museum" para audio guía en inglés. Carritos de golf disponibles (~¥150) para Luis Angel y Patricia. Tiempo mínimo: 3.5 horas.</div></div>
+            <div class="tl-item"><div class="tl-time">2:30pm – 5:00pm</div><div class="tl-place">⛩️ Templo del Cielo (天坛)</div><div class="tl-desc">El altar imperial del s.XV, 273 hectáreas. Hall of Prayer for Good Harvests (triple cúpula azul) — el edificio más fotogénico de China. El parque tiene locales con tai chi, ópera china y juegos de cartas — ventana auténtica a la vida de Beijing.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d10')"><div class="day-num" style="background:rgba(255,68,102,0.15);color:#ff4466">DÍA 10</div><div class="day-title-wrap"><div class="day-title">🎬 UNIVERSAL STUDIOS BEIJING — Día completo</div><div class="day-date">Viernes 8 de enero, 2027</div><div class="day-tags"><span class="dtag" style="background:rgba(255,68,102,0.2);color:var(--red)">El más nuevo del mundo</span><span class="dtag" style="background:rgba(155,89,182,0.15);color:var(--purple)">Harry Potter más grande</span></div></div><div class="day-toggle" id="tog-d10">▶</div></div>
+        <div class="day-body" id="body-d10">
+          <div class="tl" style="--accent:#ff4466">
+            <div class="tl-item"><div class="tl-time">8:45am</div><div class="tl-place">🚇 Metro L6 → Universal (35 min)</div><div class="tl-desc">Llegar antes de apertura. Express Pass: comprar online desde México en universalbeijingresort.com (~$80-120 USD pp). Sin Express Pass: filas de 90-120 min en Harry Potter.</div></div>
+            <div class="tl-item"><div class="tl-time">PRIORIDAD 1</div><div class="tl-place">⚡ The Wizarding World of Harry Potter</div><div class="tl-desc">La MÁS GRANDE del mundo: Hogsmeade + Diagon Alley en un solo parque. Harry Potter and the Forbidden Journey (nueva generación). Comprar varita interactiva ($35) para activar magia en puntos secretos del parque. Butterbeer CALIENTE en enero — perfecto para el frío.</div></div>
+            <div class="tl-item"><div class="tl-time">PRIORIDAD 2</div><div class="tl-place">🐼 Kung Fu Panda Land — ÚNICO EN BEIJING</div><div class="tl-desc">No existe en ningún otro Universal del mundo. Perfecto para el grupo multigeneracional. Personajes de DreamWorks en 4D.</div></div>
+            <div class="tl-item"><div class="tl-time">También</div><div class="tl-place">Transformers 3D · Jurassic World · Minions</div><div class="tl-desc">Transformers 3D: el mejor calificado del parque. Merchandising exclusivo Beijing en cada zona temática.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d11')"><div class="day-num" style="background:rgba(255,68,102,0.15);color:#ff4466">DÍA 11</div><div class="day-title-wrap"><div class="day-title">🏯 Palacio de Verano + Hutongs + Shopping Final</div><div class="day-date">Sábado 9 de enero, 2027</div></div><div class="day-toggle" id="tog-d11">▶</div></div>
+        <div class="day-body" id="body-d11">
+          <div class="tl" style="--accent:#ff4466">
+            <div class="tl-item"><div class="tl-time">9:00am</div><div class="tl-place">🏯 Palacio de Verano (颐和园) en invierno</div><div class="tl-desc">El Lago Kunming en enero puede estar parcialmente congelado. El Puente de los 17 Arcos reflejado en hielo — imagen de película. Torre de la Fragancia Budista para vistas panorámicas de Beijing.</div></div>
+            <div class="tl-item"><div class="tl-time">1:30pm – 6:30pm</div><div class="tl-place">🛍 Nanluoguxiang + Silk Street Market</div><div class="tl-desc"><strong>Nanluoguxiang</strong> (el hutong más cool de Beijing): diseñadores locales jóvenes, cafés de especialidad, boutiques indie. Calidad y originalidad.<br><br><strong>Silk Street Market</strong>: 5 pisos de todo. Ropa, bolsas, electrónicos. Ofrecer siempre 20-25% del precio pedido. Sonreír — el regateo es el juego esperado por ambas partes.</div></div>
+            <div class="tl-item"><div class="tl-time">7:30pm</div><div class="tl-place">🦆 Cena despedida — Da Dong (大董)</div><div class="tl-desc">Reconocido por Michelin, pato con la piel más fina de Beijing. Chef mundialmente famoso. ~¥200-300 pp. Brindis con vino de arroz. Mañana: vuelo Beijing → Seúl.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEOUL -->
+  <div class="city-section">
+    <div class="city-header" style="background:rgba(155,89,182,0.06)" onclick="toggleCity('kr')">
+      <div class="ch-flag">🇰🇷</div>
+      <div class="ch-info">
+        <div class="ch-title">Seúl — 서울</div>
+        <div class="ch-sub">10 – 14 Enero · 4 noches · K-beauty · Palacios · Korean BBQ · Sin visa ✅</div>
+      </div>
+      <div class="ch-badge" style="background:rgba(155,89,182,0.15);color:#9b59b6">4N</div>
+      <div class="ch-arrow" id="arr-kr">▼</div>
+    </div>
+    <div class="city-days open" id="days-kr">
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d12')"><div class="day-num" style="background:rgba(155,89,182,0.15);color:#9b59b6">DÍA 12</div><div class="day-title-wrap"><div class="day-title">✈ Vuelo Beijing→Seúl + Korean BBQ primera noche</div><div class="day-date">Domingo 10 de enero, 2027</div></div><div class="day-toggle" id="tog-d12">▶</div></div>
+        <div class="day-body" id="body-d12">
+          <div class="tl" style="--accent:#9b59b6">
+            <div class="tl-item"><div class="tl-time">Tarde</div><div class="tl-place">✈ PEK → ICN (~2h)</div><div class="tl-desc">Múltiples vuelos diarios. Salir entre 2-5pm para llegar al anochecer. Del aeropuerto Incheon: AREX (Airport Railroad Express) a Seoul Station en 43 min (₩8,500). Al llegar: comprar <strong>T-money Card</strong> en tienda GS25 o CU del aeropuerto — sirve para todo el metro y buses de Seúl.</div></div>
+            <div class="tl-item"><div class="tl-time">Noche</div><div class="tl-place">🥩 Primer Korean BBQ</div><div class="tl-desc">La experiencia que todos imaginan de Corea. Carbón en mesa, banchan (guarniciones) ilimitados, carne que ustedes cocinan. Envolver en hoja de lechuga con ajo, ssamjang y kimchi. El mesero más joven sirve la copa al mayor — ritual coreano de respeto (Luis Eduardo o Alfredo sirven a Luis Angel y Patricia).</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d13')"><div class="day-num" style="background:rgba(155,89,182,0.15);color:#9b59b6">DÍA 13</div><div class="day-title-wrap"><div class="day-title">🏯 Gyeongbokgung + Bukchon + 💄 Myeongdong</div><div class="day-date">Lunes 11 de enero, 2027</div><div class="day-tags"><span class="dtag" style="background:rgba(255,68,102,0.15);color:var(--red)">Cambio guardia 10am</span><span class="dtag" style="background:rgba(155,89,182,0.15);color:var(--purple)">👘 Hanbok = entrada gratis</span></div></div><div class="day-toggle" id="tog-d13">▶</div></div>
+        <div class="day-body" id="body-d13">
+          <div class="tl" style="--accent:#9b59b6">
+            <div class="tl-item"><div class="tl-time">9:30am</div><div class="tl-place">👘 Rentar Hanbok → Gyeongbokgung (경복궁)</div><div class="tl-desc">Rentar el traje coreano tradicional en tiendas alrededor del palacio (₩15,000-25,000 por 2-3h). Con Hanbok: <strong>entrada GRATIS</strong> al palacio. <strong>Cambio de guardia a las 10:00am</strong> en punto en Gwanghwamun — 30 min de ceremonia con trajes históricos multicolores y tambores. La foto más compartida de Seúl.</div></div>
+            <div class="tl-item"><div class="tl-time">11:00am</div><div class="tl-place">🏘 Bukchon Hanok Village (북촌한옥마을)</div><div class="tl-desc">600 casas hanok del s.XIV en colina con vistas al palacio. Callejuela Gahoe-ro 11-gil: la más fotogénica de Corea. Tejados nevados + farolas + vapor del aliento = cinematográfico.</div></div>
+            <div class="tl-item"><div class="tl-time">1:30pm</div><div class="tl-place">🎨 Insadong — Street food + Artesanías</div><div class="tl-desc">Hotteok (pancake dulce con canela — perfecto en invierno), dalgona (el caramelo viral que nació aquí, no en Netflix), gyeranbbang (pan de huevo caliente). Artesanías tradicionales coreanas.</div></div>
+            <div class="tl-item"><div class="tl-time">3:30pm – 9:00pm</div><div class="tl-place">💄 MYEONGDONG — K-beauty Capital del Mundo</div><div class="tl-desc">50+ tiendas de skincare en una sola calle. Sulwhasoo, COSRX, Laneige, Beauty of Joseon, Dr.Jart+, Papa Recipe. Señoritas ofrecen muestras gratis en cada tienda — probar antes de comprar. Tiendas abren hasta 10-11pm. Street food: tteokbokki, eomuk caliente, hopia.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d14')"><div class="day-num" style="background:rgba(155,89,182,0.15);color:#9b59b6">DÍA 14</div><div class="day-title-wrap"><div class="day-title">🗼 N Seoul Tower + Hongdae + Han River</div><div class="day-date">Martes 12 de enero, 2027</div></div><div class="day-toggle" id="tog-d14">▶</div></div>
+        <div class="day-body" id="body-d14">
+          <div class="tl" style="--accent:#9b59b6">
+            <div class="tl-item"><div class="tl-time">10:00am</div><div class="tl-place">🗼 N Seoul Tower (남산타워)</div><div class="tl-desc">Teleférico desde Myeongdong (₩10,000 round trip). 480m sobre el nivel del mar, vistas 360°. Candados del amor en el cerco exterior — tradición coreana. Mirador inferior calefaccionado para los señores.</div></div>
+            <div class="tl-item"><div class="tl-time">12:30pm</div><div class="tl-place">🥘 Mercado Gwangjang (광장시장) — famoso Netflix</div><div class="tl-desc">Mercado cubierto desde 1905. Bindaetteok (pancakes de frijol mungo, crocantes), yukhoe (tartare de res coreano), mayak kimbap. "Mayak" significa droga en coreano — por lo adictivos que son. Comer como reyes por ₩15,000 por persona.</div></div>
+            <div class="tl-item"><div class="tl-time">3:00pm</div><div class="tl-place">🎵 Hongdae (홍대) — K-pop + Streetwear</div><div class="tl-desc">Universidad Hongik, escena artística y K-pop. ARTBOX (diseño kawaii, 4 pisos). HYBE Insight Museum (BTS). Ktown4u para álbumes firmados. Shows callejeros si cae fin de semana. Ambiente bajo cero pero extremadamente vibrante.</div></div>
+            <div class="tl-item"><div class="tl-time">7:30pm</div><div class="tl-place">🌉 Paseo nocturno Han River</div><div class="tl-desc">Odeng (brocheta fish cake en caldo caliente) junto al río — el snack más reconfortante de Corea en invierno. Puentes iluminados, vista nocturna de la metrópoli coreana.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d15')"><div class="day-num" style="background:rgba(155,89,182,0.15);color:#9b59b6">DÍA 15</div><div class="day-title-wrap"><div class="day-title">🏬 COEX + Yongsan + Dongdaemun + Cena Despedida</div><div class="day-date">Miércoles 13 de enero, 2027</div></div><div class="day-toggle" id="tog-d15">▶</div></div>
+        <div class="day-body" id="body-d15">
+          <div class="tl" style="--accent:#9b59b6">
+            <div class="tl-item"><div class="tl-time">10:00am</div><div class="tl-place">🏬 COEX Mall + Starfield Library</div><div class="tl-desc">Mall subterráneo más grande de Asia. <strong>Starfield Library:</strong> estantería de 3 pisos con 70,000 libros — la foto más compartida de Corea después de Bukchon. Samsung D'Light showroom: Galaxy plegables, TVs del futuro, AR/VR. Gratis y fascinante.</div></div>
+            <div class="tl-item"><div class="tl-time">1:30pm</div><div class="tl-place">📱 Yongsan Electronics + DDP Dongdaemun</div><div class="tl-desc">Yongsan: Samsung/Sony/Apple a precio coreano (guardar recibos para tax refund). DDP (diseño Zaha Hadid): arquitectura futurista sin ángulos rectos, mercado de diseñadores emergentes coreanos.</div></div>
+            <div class="tl-item"><div class="tl-time">7:30pm</div><div class="tl-place">🥩 CENA DE DESPEDIDA — Samwon Garden (삼원가든)</div><div class="tl-desc">El restaurante más famoso de Seúl desde 1976. Galbi premium (costillas de res marinadas), jardín espectacular en invierno. Brindis con soju y makgeolli. <strong>El ritual:</strong> Luis Eduardo y Alfredo sirven la copa a Luis Angel y Patricia — el viaje más épico de sus vidas merece este cierre.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('d16')"><div class="day-num" style="background:rgba(155,89,182,0.15);color:#9b59b6">DÍA 16</div><div class="day-title-wrap"><div class="day-title">✈ Regreso a México — ICN 11:40am</div><div class="day-date">Jueves 14 de enero, 2027</div></div><div class="day-toggle" id="tog-d16">▶</div></div>
+        <div class="day-body" id="body-d16">
+          <div class="tl" style="--accent:#9b59b6">
+            <div class="tl-item"><div class="tl-time">⚠️ 6:50am MÁXIMO</div><div class="tl-place">AREX desde Seoul Station → ICN (43 min)</div><div class="tl-desc">Estar en aeropuerto Incheon a las <strong>8:00am</strong>. Tax Refund antes de emigración (mostrador especial, llevar recibos y productos). Duty Free ICN: el mejor de Asia — kimchi al vacío para llevar a México, cosméticos, marcas de lujo.</div></div>
+            <div class="tl-item"><div class="tl-time">11:40am ✈</div><div class="tl-place">ICN → MEX — A Casa</div><div class="tl-desc">17 noches. 4 ciudades. 2 países. La Gran Muralla de China, dos parques temáticos épicos, Nochevieja en The Bund, Guerreros de Terracota, Ciudad Prohibida, K-beauty y Korean BBQ. La familia Mecinas regresa con maletas llenas y recuerdos para toda la vida. 🎊</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SHOPPING -->
+<div class="page" id="page-shopping">
+  <div class="shop-section">
+    <div class="shop-city-title" style="color:#4a9eff">🇨🇳 Shanghai</div>
+    <div class="shop-grid">
+      <div class="shop-card"><div class="shop-icon">🧧</div><div class="shop-name">Tianzifang</div><div class="shop-type" style="color:#4a9eff">Artesanías únicas</div><div class="shop-desc">Callejones artísticos. Arte local, seda, cerámica de diseñador. Todo original sin copias. Mejor para regalos auténticos.</div></div>
+      <div class="shop-card"><div class="shop-icon">📱</div><div class="shop-name">Mercado de Perlas</div><div class="shop-type" style="color:#4a9eff">Electrónicos + Jade</div><div class="shop-desc">Metro Science Museum. 4 pisos. Jade, bisutería, electrónicos, bolsas. Empezar en 30% del precio inicial.</div></div>
+      <div class="shop-card"><div class="shop-icon">💎</div><div class="shop-name">Plaza 66 / IAPM Mall</div><div class="shop-type" style="color:#4a9eff">Lujo Internacional</div><div class="shop-desc">LV, Gucci, Hermès, Cartier. Ediciones exclusivas Asia no disponibles en México.</div></div>
+      <div class="shop-card"><div class="shop-icon">🛒</div><div class="shop-name">Nanjing Road</div><div class="shop-type" style="color:#4a9eff">Todo tipo</div><div class="shop-desc">5.5km peatonales. Tiendas populares, marcas chinas, street food. Ideal para primera compra en China.</div></div>
+    </div>
+    <div class="shop-city-title" style="color:#ff8c42">🏺 Xi'an</div>
+    <div class="shop-grid">
+      <div class="shop-card"><div class="shop-icon">🕌</div><div class="shop-name">Muslim Quarter</div><div class="shop-type" style="color:#ff8c42">Ruta de la Seda</div><div class="shop-desc">Soldados terracota miniatura, especias únicas, té pu-erh prensado, jade, bufandas seda. Regatear siempre.</div></div>
+      <div class="shop-card"><div class="shop-icon">🎨</div><div class="shop-name">Shuyuanmen Street</div><div class="shop-type" style="color:#ff8c42">Arte y Caligrafía</div><div class="shop-desc">Pinturas de tinta china, caligrafía artística, papel hecho a mano, sellos de jade personalizados con tu nombre.</div></div>
+    </div>
+    <div class="shop-city-title" style="color:#ff4466">🏯 Beijing</div>
+    <div class="shop-grid">
+      <div class="shop-card"><div class="shop-icon">👜</div><div class="shop-name">Silk Street / Yashow</div><div class="shop-type" style="color:#ff4466">Regateo intenso</div><div class="shop-desc">Ropa, bolsas, electrónicos. Empezar en 20% del precio pedido. El proceso de regateo es parte de la experiencia cultural.</div></div>
+      <div class="shop-card"><div class="shop-icon">🏘</div><div class="shop-name">Nanluoguxiang</div><div class="shop-type" style="color:#ff4466">Diseño local</div><div class="shop-desc">Diseñadores jóvenes de Beijing. Moda alternativa, arte, boutiques indie. Calidad alta, precios razonables.</div></div>
+      <div class="shop-card"><div class="shop-icon">🎨</div><div class="shop-name">798 Art District</div><div class="shop-type" style="color:#ff4466">Arte contemporáneo</div><div class="shop-desc">Galerías, instalaciones, diseño. Arte chino contemporáneo para coleccionistas y curiosos. Entrada gratis.</div></div>
+      <div class="shop-card"><div class="shop-icon">🏯</div><div class="shop-name">Tienda Ciudad Prohibida</div><div class="shop-type" style="color:#ff4466">Souvenirs premium</div><div class="shop-desc">Réplicas oficiales de artefactos imperiales, joyería inspirada en la colección imperial, libros de arte.</div></div>
+    </div>
+    <div class="shop-city-title" style="color:#9b59b6">🇰🇷 Seúl</div>
+    <div class="shop-grid">
+      <div class="shop-card"><div class="shop-icon">💄</div><div class="shop-name">Myeongdong</div><div class="shop-type" style="color:#9b59b6">K-beauty Capital</div><div class="shop-desc">Sulwhasoo, COSRX, Laneige, Beauty of Joseon, Dr.Jart+, Papa Recipe. 30-40% más barato que en México. Muestras gratis en cada tienda.</div></div>
+      <div class="shop-card"><div class="shop-icon">👟</div><div class="shop-name">Hongdae</div><div class="shop-type" style="color:#9b59b6">K-pop + Streetwear</div><div class="shop-desc">ARTBOX, HYBE Insight (BTS), Ktown4u. Álbumes firmados, merchandising K-pop exclusivo, moda alternativa.</div></div>
+      <div class="shop-card"><div class="shop-icon">📱</div><div class="shop-name">Yongsan Electronics</div><div class="shop-type" style="color:#9b59b6">Electrónicos</div><div class="shop-desc">Samsung, LG, Sony a precio de fábrica. Pedir factura para tax refund (10% devolución en aeropuerto ICN).</div></div>
+      <div class="shop-card"><div class="shop-icon">🌙</div><div class="shop-name">Dongdaemun 24h</div><div class="shop-type" style="color:#9b59b6">Moda y Diseño</div><div class="shop-desc">Abre hasta las 5am. Ropa, telas, accesorios a precio mayoreo. DDP (arquitectura Zaha Hadid) para diseñadores emergentes.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TIPS -->
+<div class="page" id="page-tips">
+  <div class="section-title">💡 Tips Esenciales — No Olvidar</div>
+  <div class="tips-grid">
+    <div class="tip-card"><div class="tc-icon">🔒</div><div class="tc-title">VPN — CRÍTICO para China</div><div class="tc-text">Contratar ExpressVPN o NordVPN desde México antes de salir. En China están bloqueados: Google, WhatsApp, Instagram, Gmail, YouTube, Facebook. Sin VPN = sin comunicación con México.</div><div class="tc-tags"><span class="tc-tag" style="color:#e74c3c">⚠️ Instalar ANTES de salir de México</span></div></div>
+    <div class="tip-card"><div class="tc-icon">💳</div><div class="tc-title">Pagos en China</div><div class="tc-text">China es 95% cashless. Configurar WeChat Pay O Alipay International con tarjeta Visa/Mastercard antes de llegar. Llevar ¥1,000-1,500 en efectivo por persona como respaldo.</div><div class="tc-tags"><span class="tc-tag">WeChat Pay</span><span class="tc-tag">Alipay Internacional</span><span class="tc-tag">¥ efectivo respaldo</span></div></div>
+    <div class="tip-card"><div class="tc-icon">🚄</div><div class="tc-title">Trenes Bala China</div><div class="tc-text">Reservar en Trip.com (más fácil que 12306 oficial). Clase Business recomendada. Mostrar pasaporte al abordar. Shanghai→Xi'an: ~5.5h · Xi'an→Beijing: ~4.5h</div><div class="tc-tags"><span class="tc-tag">Trip.com</span><span class="tc-tag">Clase Business</span><span class="tc-tag">Pasaporte obligatorio</span></div></div>
+    <div class="tip-card"><div class="tc-icon">🗺️</div><div class="tc-title">Traducción en Tiempo Real</div><div class="tc-text">Google Translate: descargar paquete CHINO y COREANO offline. La función de CÁMARA traduce menús en tiempo real — imprescindible para leer cualquier cosa en China.</div><div class="tc-tags"><span class="tc-tag">Offline obligatorio</span><span class="tc-tag">Función cámara</span></div></div>
+    <div class="tip-card"><div class="tc-icon">🚕</div><div class="tc-title">Transporte en Ciudades</div><div class="tc-text"><strong>China:</strong> DiDi app versión internacional (Uber chino, en inglés). Metro funciona perfecto en SH/Xi'an/BJ.<br><strong>Corea:</strong> T-money Card para metro y buses. AREX desde ICN a Seoul Station (43 min).</div><div class="tc-tags"><span class="tc-tag">DiDi China</span><span class="tc-tag">T-money Corea</span><span class="tc-tag">AREX aeropuerto</span></div></div>
+    <div class="tip-card"><div class="tc-icon">🧊</div><div class="tc-title">Clima — Todo Muy Frío</div><div class="tc-text">Shanghai 3-9°C · Xi'an -2 a 6°C · Beijing -5 a 3°C · Seúl -6 a 2°C. Ropa térmica interior imprescindible. Guantes y gorro especialmente para la Gran Muralla. En Beijing puede nevar.</div><div class="tc-tags"><span class="tc-tag">Ropa térmica</span><span class="tc-tag">Guantes</span><span class="tc-tag">Gorro lana</span></div></div>
+    <div class="tip-card"><div class="tc-icon">💰</div><div class="tc-title">Tax Refund — No Desperdiciar</div><div class="tc-text"><strong>Corea:</strong> Compras +₩30,000 en tiendas Tax Free → guardar recibo → mostrador ICN antes de emigración → recuperar ~10% IVA. <strong>China:</strong> También disponible en aeropuertos con recibos de tiendas autorizadas.</div><div class="tc-tags"><span class="tc-tag">Guardar TODOS los recibos</span></div></div>
+    <div class="tip-card"><div class="tc-icon">🏥</div><div class="tc-title">Salud y Seguros</div><div class="tc-text">Seguro de viaje internacional obligatorio (cubre gastos médicos). En China: United Family Hospital (Shanghai/Beijing) para extranjeros. En Corea: hospitales con servicio en inglés. Llevar copias de pasaportes separadas de los originales.</div><div class="tc-tags"><span class="tc-tag">Seguro internacional</span><span class="tc-tag">Copias pasaportes</span></div></div>
+  </div>
+  <div style="padding:0 20px 20px">
+    <div style="background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.2);border-radius:12px;padding:16px 18px">
+      <div style="font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">📋 Checklist de Preparativos por Mes</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="font-size:11px;color:rgba(255,255,255,0.65);line-height:1.8"><strong style="color:#fff">Ahora mismo</strong><br>☐ Contratar VPN (ExpressVPN/NordVPN)<br>☐ Descargar Trip.com y DiDi<br>☐ Verificar vigencia 5 pasaportes<br>☐ Descargar Disney Parks app</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.65);line-height:1.8"><strong style="color:#fff">Septiembre 2026</strong><br>☐ Reservar hoteles 4★ en las 4 ciudades<br>☐ Comprar tickets Shanghai Disney<br>☐ Comprar Express Pass Universal Beijing<br>☐ Reservar vuelo PEK→ICN interno</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.65);line-height:1.8"><strong style="color:#fff">Octubre 2026</strong><br>☐ Tramitar 5 visas China en CDMX<br>☐ Reservar trenes bala en Trip.com<br>☐ Configurar WeChat Pay / Alipay<br>☐ Contratar seguro de viaje</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.65);line-height:1.8"><strong style="color:#fff">Noviembre 2026</strong><br>☐ Reservar restaurante NYE Bund (M on the Bund)<br>☐ Contratar tour privado Gran Muralla<br>☐ Tickets Ciudad Prohibida (tickets.dpm.org.cn)<br>☐ Reservar Quanjude Wangfujing Beijing</div>
+      </div>
+    </div>
+  </div>
+  <div style="padding:16px 20px 40px;text-align:center">
+    <div style="font-size:11px;color:var(--muted);line-height:1.8">Guía preparada especialmente para <strong style="color:#fff">todos ustedes</strong><br>Diciembre 2026 – Enero 2027<br><span style="color:var(--gold)">¡El viaje de sus vidas! 🎊</span></div>
+  </div>
+</div>
+
+<script>
+function initHomeMap(){
+  if(document.getElementById('home-map')._hmap) return;
+  const hmap=L.map('home-map',{zoomControl:false,scrollWheelZoom:false,dragging:true,attributionControl:false})
+    .setView([36,118],4);
+  document.getElementById('home-map')._hmap=hmap;
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:10}).addTo(hmap);
+
+  // Ciudades con sus datos
+  const stops=[
+    {latlng:[31.2304,121.4737],color:'#4a9eff',label:'Shanghai',dates:'30 Dic – 3 Ene',icon:'🏙️'},
+    {latlng:[34.2603,108.9480],color:'#ff8c42',label:"Xi'an",dates:'3 – 5 Ene',icon:'🏺'},
+    {latlng:[39.9042,116.4074],color:'#ff4466',label:'Beijing',dates:'5 – 10 Ene',icon:'🏯'},
+    {latlng:[37.5665,126.9780],color:'#9b59b6',label:'Seúl',dates:'10 – 14 Ene',icon:'🇰🇷'},
+  ];
+
+  // Línea de tren (Shanghai→Xi'an→Beijing) punteada dorada
+  const trainRoute=[[31.2304,121.4737],[34.2603,108.9480],[39.9042,116.4074]];
+  L.polyline(trainRoute,{color:'#f0b429',weight:2.5,dashArray:'8 5',opacity:0.85}).addTo(hmap);
+
+  // Línea de vuelo Beijing→Seúl: arco curvo generado con puntos intermedios
+  function arcPoints(a,b,n=30,bend=0.18){
+    const pts=[];
+    const mlat=(a[0]+b[0])/2+(b[1]-a[1])*bend;
+    const mlng=(a[1]+b[1])/2-(b[0]-a[0])*bend;
+    for(let i=0;i<=n;i++){
+      const t=i/n;
+      const lat=(1-t)*(1-t)*a[0]+2*(1-t)*t*mlat+t*t*b[0];
+      const lng=(1-t)*(1-t)*a[1]+2*(1-t)*t*mlng+t*t*b[1];
+      pts.push([lat,lng]);
+    }
+    return pts;
+  }
+  L.polyline(arcPoints([39.9042,116.4074],[37.5665,126.9780]),{color:'#9b59b6',weight:2,dashArray:'5 6',opacity:0.8}).addTo(hmap);
+
+  // Marcadores de ciudades
+  stops.forEach((s,i)=>{
+    const pulse=i===0?`<div style="position:absolute;inset:-5px;border-radius:50%;border:2px solid ${s.color};opacity:0.4;animation:pulse 2s ease-out infinite"></div>`:'';
+    const html=`<div style="position:relative;width:36px;height:36px">
+      ${pulse}
+      <div style="width:36px;height:36px;border-radius:50%;background:${s.color}25;border:2.5px solid ${s.color};display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 14px ${s.color}55;backdrop-filter:blur(4px)">${s.icon}</div>
+    </div>`;
+    const icon=L.divIcon({html,className:'',iconSize:[36,36],iconAnchor:[18,18]});
+    L.marker(s.latlng,{icon}).addTo(hmap)
+      .bindTooltip(`<strong>${s.label}</strong><br><span style="color:${s.color};font-size:10px">${s.dates}</span>`,
+        {permanent:false,direction:'top',className:'route-tooltip',offset:[0,-20]});
+
+    // Etiqueta permanente de ciudad
+    L.marker(s.latlng,{
+      icon:L.divIcon({
+        html:`<div style="font-size:10px;font-weight:700;color:#fff;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,0.9);margin-top:22px;margin-left:-14px">${s.label}</div>`,
+        className:'',iconSize:[80,20],iconAnchor:[0,0]
+      })
+    }).addTo(hmap);
+  });
+}
+window.addEventListener('load',initHomeMap);
+function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  if(id==='maps') setTimeout(initMap,100);
+}
+function toggleCity(id){
+  const el=document.getElementById('days-'+id);
+  const arr=document.getElementById('arr-'+id);
+  el.classList.toggle('open');
+  arr.textContent=el.classList.contains('open')?'▼':'▶';
+}
+function toggleDay(id){
+  const body=document.getElementById('body-'+id);
+  const tog=document.getElementById('tog-'+id);
+  body.classList.toggle('open');
+  tog.textContent=body.classList.contains('open')?'▼':'▶';
+}
+let map=null,currentCity='shanghai';
+const cities={
+  shanghai:{center:[31.2304,121.4737],zoom:12,color:'#4a9eff',markers:[
+    {lat:31.2397,lng:121.4900,icon:'★',color:'#f0b429',name:'The Bund / NYE',day:'Día 2',desc:'Nochevieja más épica del viaje'},
+    {lat:31.2274,lng:121.4929,icon:'🏮',color:'#2ecc71',name:'Yu Garden (Yuyuan)',day:'Día 2',desc:'Jardín clásico del s.XVI + Bazar'},
+    {lat:31.2190,lng:121.4470,icon:'🌿',color:'#9b59b6',name:'French Concession',day:'Día 2',desc:'Barrio más cool de Shanghai'},
+    {lat:31.2362,lng:121.4704,icon:'🛍',color:'#f0b429',name:'Nanjing Road Peatonal',day:'Días 1-4',desc:'5.5km, 600 tiendas'},
+    {lat:31.1443,lng:121.6657,icon:'🏰',color:'#ff4466',name:'Shanghai Disney Resort',day:'Día 3',desc:'TRON + Zootopia únicos en el mundo'},
+    {lat:31.2280,lng:121.5000,icon:'🗼',color:'#4a9eff',name:'Shanghai Tower (piso 100)',day:'Día 4',desc:'Vista más alta de China'},
+    {lat:31.2193,lng:121.4730,icon:'X',color:'#ff8c42',name:'Xintiandi',day:'Días 2+4',desc:'Zona boutique, cena, nightlife'},
+    {lat:31.2362,lng:121.5200,icon:'💎',color:'#f0b429',name:'Mercado de Perlas',day:'Día 4',desc:'4 pisos: jade, electrónicos, bisutería'},
+  ]},
+  xian:{center:[34.2603,108.9480],zoom:13,color:'#ff8c42',markers:[
+    {lat:34.2600,lng:108.9480,icon:'🔔',color:'#ff8c42',name:'Bell Tower (centro)',day:'Días 5-6',desc:'Centro histórico de Xi\'an'},
+    {lat:34.2655,lng:108.9415,icon:'🕌',color:'#ff8c42',name:'Muslim Quarter (Huimin Jie)',day:'Día 5',desc:'Mercado nocturno + Roujiamo + Shopping'},
+    {lat:34.2603,lng:108.9533,icon:'🧱',color:'#f0b429',name:'Muralla de Xi\'an — Puerta Sur',day:'Día 6',desc:'14km intactos, bici o carrito eléctrico'},
+    {lat:34.3844,lng:109.2730,icon:'⚔️',color:'#ff4466',name:'Guerreros de Terracota',day:'Día 6',desc:'8,000 soldados del 210 a.C.'},
+    {lat:34.2580,lng:108.9478,icon:'🏨',color:'#2ecc71',name:'Zona hotelera recomendada',day:'',desc:'Sofitel/Grand Mercure cerca muralla'},
+  ]},
+  beijing:{center:[39.9042,116.4074],zoom:11,color:'#ff4466',markers:[
+    {lat:39.9163,lng:116.3972,icon:'🏛️',color:'#ff4466',name:'Ciudad Prohibida (Gugong)',day:'Día 9',desc:'980 edificios, 500 años historia imperial'},
+    {lat:39.9033,lng:116.3975,icon:'🏟',color:'#ff4466',name:'Plaza Tiananmen',day:'Día 9',desc:'La plaza más grande del mundo'},
+    {lat:39.8821,lng:116.4066,icon:'⛩️',color:'#2ecc71',name:'Templo del Cielo',day:'Día 9',desc:'Cúpula azul icónica del s.XV'},
+    {lat:40.4399,lng:116.5650,icon:'🧱',color:'#f0b429',name:'Gran Muralla — Mutianyu',day:'Día 8',desc:'Teleférico + tobogán, menos turistas'},
+    {lat:39.9145,lng:116.4100,icon:'🛍',color:'#f0b429',name:'Wangfujing Street',day:'Día 7',desc:'Calle comercial + snacks exóticos'},
+    {lat:40.0003,lng:116.2755,icon:'🏯',color:'#4a9eff',name:'Palacio de Verano',day:'Día 11',desc:'Lago congelado en enero — épico'},
+    {lat:39.9342,lng:116.4021,icon:'胡',color:'#9b59b6',name:'Nanluoguxiang Hutong',day:'Día 11',desc:'El barrio más cool de Beijing'},
+    {lat:39.9151,lng:116.6666,icon:'🎬',color:'#ff4466',name:'Universal Studios Beijing',day:'Día 10',desc:'Harry Potter más grande del mundo'},
+    {lat:39.9145,lng:116.4478,icon:'👜',color:'#f0b429',name:'Silk Street Market',day:'Día 11',desc:'Regateo intenso, 5 pisos'},
+  ]},
+  seoul:{center:[37.5665,126.9780],zoom:12,color:'#9b59b6',markers:[
+    {lat:37.5796,lng:126.9770,icon:'🏯',color:'#2ecc71',name:'Gyeongbokgung Palace',day:'Día 13',desc:'Cambio guardia 10am · Hanbok = gratis'},
+    {lat:37.5829,lng:126.9854,icon:'🏘',color:'#ff8c42',name:'Bukchon Hanok Village',day:'Día 13',desc:'La calle más fotogénica de Corea'},
+    {lat:37.5636,lng:126.9836,icon:'💄',color:'#ff4466',name:'Myeongdong',day:'Día 13',desc:'K-beauty capital del mundo'},
+    {lat:37.5512,lng:126.9882,icon:'🗼',color:'#9b59b6',name:'N Seoul Tower',day:'Día 14',desc:'Vistas 360° + candados del amor'},
+    {lat:37.5572,lng:126.9245,icon:'🎵',color:'#4a9eff',name:'Hongdae',day:'Día 14',desc:'K-pop, streetwear, ARTBOX, HYBE'},
+    {lat:37.5128,lng:127.0588,icon:'🏬',color:'#f0b429',name:'COEX + Starfield Library',day:'Día 15',desc:'Mall más grande Asia + foto icónica'},
+    {lat:37.5700,lng:127.0077,icon:'🥘',color:'#2ecc71',name:'Mercado Gwangjang',day:'Día 14',desc:'Famoso Netflix, desde 1905'},
+    {lat:37.5319,lng:126.9635,icon:'📱',color:'#4a9eff',name:'Yongsan Electronics',day:'Día 15',desc:'Samsung/LG a precio de fábrica'},
+    {lat:37.5706,lng:127.0098,icon:'🌙',color:'#9b59b6',name:'Dongdaemun DDP (Zaha Hadid)',day:'Día 15',desc:'Arquitectura futurista + moda 24h'},
+  ]},
+};
+function initMap(){
+  if(map) return;
+  map=L.map('map',{zoomControl:true}).setView([31.2304,121.4737],12);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB · © OSM contributors',maxZoom:19}).addTo(map);
+  renderMarkers('shanghai');
+}
+function renderMarkers(city){
+  if(!map) return;
+  map.eachLayer(l=>{ if(l instanceof L.Marker) map.removeLayer(l); });
+  const c=cities[city];
+  map.setView(c.center,c.zoom);
+  c.markers.forEach(m=>{
+    const txt=m.icon.length>2?`<span style="font-size:11px;font-weight:800;color:${m.color}">${m.icon}</span>`:m.icon;
+    const div=`<div style="width:32px;height:32px;border-radius:50%;background:${m.color}20;border:2px solid ${m.color};display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,0.6);cursor:pointer">${txt}</div>`;
+    const icon=L.divIcon({html:div,className:'',iconSize:[32,32],iconAnchor:[16,16]});
+    L.marker([m.lat,m.lng],{icon}).addTo(map).bindPopup(
+      `<div class="popup-title">${m.name}</div><div class="popup-sub">${m.desc}</div>${m.day?`<span class="popup-day" style="background:${m.color}20;color:${m.color}">${m.day}</span>`:''}`
+    );
+  });
+  const leg=document.getElementById('map-legend');
+  if(leg) leg.innerHTML='<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Lugares</div>'+
+    c.markers.slice(0,5).map(m=>`<div class="leg-item"><div class="leg-dot" style="background:${m.color}"></div><span>${m.name.substring(0,22)}</span></div>`).join('');
+}
+function switchMap(city,el){
+  document.querySelectorAll('.mctab').forEach(t=>{t.style.background='';t.style.borderColor='';t.style.color='';t.classList.remove('active');});
+  const c=cities[city];
+  el.style.background=c.color+'22';el.style.borderColor=c.color;el.style.color=c.color;el.classList.add('active');
+  if(map) renderMarkers(city); else { currentCity=city; initMap(); }
+}
+</script>
+</body>
+</html>
