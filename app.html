@@ -62,6 +62,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .map-pin-tip{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top-width:9px;border-top-style:solid;margin-top:-1px}
 .map-pin-pulse{position:absolute;inset:-6px;border-radius:14px;border:2px solid;animation:pinpulse 2.2s ease-out infinite;opacity:0}
 @keyframes pinpulse{0%{transform:scale(0.85);opacity:.7}100%{transform:scale(1.7);opacity:0}}
+@keyframes hintbob{0%{transform:translateX(-50%) translateY(0)}100%{transform:translateX(-50%) translateY(-5px)}}
 .leaflet-popup-content-wrapper{background:#0e1525;border:1px solid rgba(255,255,255,0.12);border-radius:14px;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.7);padding:0;overflow:hidden}
 .leaflet-popup-tip-container{display:none}
 .leaflet-popup-content{margin:0;width:220px!important}
@@ -166,9 +167,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
       <div class="rpill"><div class="rpill-dot" style="background:#9b59b6"></div><span style="color:#9b59b6">ICN</span></div>
       <div style="color:rgba(255,255,255,0.3);font-size:11px">✈</div>
       <div class="rpill"><div class="rpill-dot" style="background:#4a9eff"></div><span style="color:#4a9eff">Shanghai</span></div>
-      <div style="color:rgba(255,255,255,0.3);font-size:11px">✈</div>
+      <div style="color:rgba(255,255,255,0.3);font-size:11px">🚄</div>
       <div class="rpill"><div class="rpill-dot" style="background:#2ecc71"></div><span style="color:#2ecc71">Chongqing</span></div>
-      <div style="color:rgba(255,255,255,0.3);font-size:11px">✈</div>
+      <div style="color:rgba(255,255,255,0.3);font-size:11px">🚄</div>
       <div class="rpill"><div class="rpill-dot" style="background:#ff8c42"></div><span style="color:#ff8c42">Xi'an</span></div>
       <div style="color:rgba(255,255,255,0.3);font-size:11px">🚄</div>
       <div class="rpill"><div class="rpill-dot" style="background:#ff4466"></div><span style="color:#ff4466">Beijing</span></div>
@@ -190,19 +191,35 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   </div>
   <!-- MAPA RUTA INICIO -->
   <div style="position:relative;border-bottom:1px solid var(--border)">
-    <div style="position:absolute;top:12px;left:12px;z-index:999;background:rgba(10,14,26,0.9);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 14px;pointer-events:none">
+    <!-- Leyenda overview -->
+    <div id="hmap-legend" style="position:absolute;top:12px;left:12px;z-index:999;background:rgba(10,14,26,0.9);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 14px;pointer-events:none;transition:opacity .4s">
       <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Ruta del viaje</div>
       <div style="display:flex;flex-direction:column;gap:5px">
-        <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#9b59b6;flex-shrink:0"></div>Seúl · entrada 30 Dic</div>
         <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#4a9eff;flex-shrink:0"></div>Shanghai · 30 Dic–3 Ene</div>
         <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#2ecc71;flex-shrink:0"></div>Chongqing 🐼 · 3–5 Ene</div>
         <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#ff8c42;flex-shrink:0"></div>Xi'an · 5–7 Ene</div>
         <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#ff4466;flex-shrink:0"></div>Beijing · 7–11 Ene</div>
         <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#9b59b6;flex-shrink:0"></div>Seúl · 11–14 Ene</div>
-        <div style="margin-top:4px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);font-size:9px;color:rgba(255,255,255,0.35)">— — — tren bala &nbsp;&nbsp; ✈ vuelo</div>
+        <div style="margin-top:4px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);font-size:9px;color:rgba(255,255,255,0.35)">— — — 🚄 tren &nbsp;&nbsp;· · · ✈ vuelo</div>
       </div>
     </div>
-    <div id="home-map" style="height:380px;width:100%"></div>
+    <!-- Overlay ciudad (aparece al hacer zoom) -->
+    <div id="hmap-overlay" style="display:none;position:absolute;bottom:14px;left:12px;right:12px;z-index:1000;background:rgba(8,12,24,0.96);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px 16px;backdrop-filter:blur(16px)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div id="hmap-icon" style="font-size:28px;line-height:1"></div>
+          <div>
+            <div id="hmap-name" style="font-size:17px;font-weight:800;color:#fff;line-height:1.1"></div>
+            <div id="hmap-dates" style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:3px"></div>
+          </div>
+        </div>
+        <button onclick="hmapBack()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.13);border-radius:10px;color:rgba(255,255,255,0.7);font-size:11px;font-weight:700;padding:7px 13px;cursor:pointer;letter-spacing:.3px;flex-shrink:0">← Volver</button>
+      </div>
+      <div id="hmap-highlights" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+    </div>
+    <!-- Hint "toca para explorar" -->
+    <div id="hmap-hint" style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:999;background:rgba(10,14,26,0.82);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:6px 16px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.45);white-space:nowrap;pointer-events:none;transition:opacity .5s;animation:hintbob 2.4s ease-in-out infinite alternate">👆 Toca una ciudad</div>
+    <div id="home-map" style="height:410px;width:100%"></div>
   </div>
 
   <!-- INFO VUELOS -->
@@ -654,31 +671,86 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 <script>
 /* ── HOME MAP ─────────────────────────────────── */
+var hmap=null, hmapZoomed=false;
+
+var homeStops=[
+  {latlng:[31.2304,121.4737],color:'#4a9eff',label:'Shanghai',dates:'30 Dic – 3 Ene',icon:'🏙️',zoom:10,
+   hi:['🎆 NYE en The Bund','🗼 Shanghai Tower 632m','🎢 Disney Resort','🧧 Yu Garden']},
+  {latlng:[29.5630,106.5516],color:'#2ecc71',label:'Chongqing',dates:'3 – 5 Ene',icon:'🐼',zoom:11,
+   hi:['🐼 240+ pandas gigantes','🌃 Hongya Cave (Ghibli)','🍲 Hot Pot Mala picante','🚇 Metro dentro de edificio']},
+  {latlng:[34.2603,108.9480],color:'#ff8c42',label:"Xi'an",dates:'5 – 7 Ene',icon:'🏺',zoom:11,
+   hi:['⚔️ Guerreros de Terracota','🕌 Muslim Quarter nocturno','🧱 Muralla en bici 14km','🔔 Bell Tower']},
+  {latlng:[39.9042,116.4074],color:'#ff4466',label:'Beijing',dates:'7 – 11 Ene',icon:'🏯',zoom:10,
+   hi:['🧱 Gran Muralla Mutianyu','🏛️ Ciudad Prohibida','🎠 Universal Studios','⛸️ Pista olímpica Shougang']},
+  {latlng:[37.5665,126.9780],color:'#9b59b6',label:'Seúl',dates:'11 – 14 Ene',icon:'🇰🇷',zoom:11,
+   hi:['🏯 Gyeongbokgung Palace','📡 N Seoul Tower','🥩 Korean BBQ Palsaik','💄 K-beauty Myeongdong']},
+];
+
 function initHomeMap(){
   var el=document.getElementById('home-map');
   if(el._hmap) return;
-  var hmap=L.map('home-map',{zoomControl:false,scrollWheelZoom:false,dragging:false,touchZoom:false,tap:false,attributionControl:false}).setView([36,122],4);
+  hmap=L.map('home-map',{zoomControl:false,scrollWheelZoom:false,dragging:false,
+    touchZoom:false,tap:false,attributionControl:false,keyboard:false,
+    doubleClickZoom:false,boxZoom:false}).setView([33,115],4);
   el._hmap=hmap;
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:10}).addTo(hmap);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:12}).addTo(hmap);
+
   function arc(a,b,n,bend){n=n||40;bend=bend||0.22;var pts=[],ml=(a[0]+b[0])/2+(b[1]-a[1])*bend,mg=(a[1]+b[1])/2-(b[0]-a[0])*bend;for(var i=0;i<=n;i++){var t=i/n;pts.push([(1-t)*(1-t)*a[0]+2*(1-t)*t*ml+t*t*b[0],(1-t)*(1-t)*a[1]+2*(1-t)*t*mg+t*t*b[1]]);}return pts;}
-  L.polyline(arc([37.5665,126.9780],[31.2304,121.4737],40,-0.2),{color:'#9b59b6',weight:2,dashArray:'6 5',opacity:0.75}).addTo(hmap);
-  L.polyline(arc([31.2304,121.4737],[29.5630,106.5516],40,0.15),{color:'#2ecc71',weight:2,dashArray:'6 5',opacity:0.75}).addTo(hmap);
-  L.polyline(arc([29.5630,106.5516],[34.2603,108.9480],40,-0.1),{color:'#2ecc71',weight:2,dashArray:'6 5',opacity:0.75}).addTo(hmap);
-  L.polyline([[34.2603,108.9480],[39.9042,116.4074]],{color:'#f0b429',weight:2.5,dashArray:'9 5',opacity:0.85}).addTo(hmap);
-  L.polyline(arc([39.9042,116.4074],[37.5665,126.9780]),{color:'#9b59b6',weight:2,dashArray:'6 5',opacity:0.75}).addTo(hmap);
-  var stops=[
-    {latlng:[37.5665,126.9780],color:'#9b59b6',label:'Seúl',sub:'entrada 30 Dic / salida 14 Ene',icon:'🇰🇷',pulse:true},
-    {latlng:[31.2304,121.4737],color:'#4a9eff',label:'Shanghai',sub:'30 Dic – 3 Ene',icon:'🏙️'},
-    {latlng:[29.5630,106.5516],color:'#2ecc71',label:'Chongqing',sub:'3 – 5 Ene 🐼',icon:'🐼'},
-    {latlng:[34.2603,108.9480],color:'#ff8c42',label:"Xi'an",sub:'5 – 7 Ene',icon:'🏺'},
-    {latlng:[39.9042,116.4074],color:'#ff4466',label:'Beijing',sub:'7 – 11 Ene',icon:'🏯'},
-  ];
-  stops.forEach(function(s){
-    var p=s.pulse?('<div style="position:absolute;inset:-7px;border-radius:50%;border:2px solid '+s.color+';animation:pulse 2s ease-out infinite;opacity:0"></div>'):'';
-    var mk='<div style="display:flex;flex-direction:column;align-items:center"><div style="position:relative;width:40px;height:40px;border-radius:50%;background:'+s.color+'22;border:2.5px solid '+s.color+';display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 0 20px '+s.color+'55">'+s.icon+p+'</div><div style="font-size:10px;font-weight:800;color:#fff;white-space:nowrap;margin-top:5px;text-shadow:0 1px 6px rgba(0,0,0,1)">'+s.label+'</div><div style="font-size:8px;color:'+s.color+';white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,1)">'+s.sub+'</div></div>';
-    L.marker(s.latlng,{icon:L.divIcon({html:mk,className:'',iconSize:[110,72],iconAnchor:[55,20]})}).addTo(hmap);
+
+  /* vuelos: arco púrpura punteado */
+  L.polyline(arc([37.5665,126.9780],[31.2304,121.4737],40,-0.2),{color:'#9b59b6',weight:2,dashArray:'5 6',opacity:0.7}).addTo(hmap);
+  L.polyline(arc([39.9042,116.4074],[37.5665,126.9780]),{color:'#9b59b6',weight:2,dashArray:'5 6',opacity:0.7}).addTo(hmap);
+  /* trenes: línea dorada más gruesa */
+  L.polyline(arc([31.2304,121.4737],[29.5630,106.5516],40,0.15),{color:'#f0b429',weight:2.5,dashArray:'10 5',opacity:0.9}).addTo(hmap);
+  L.polyline(arc([29.5630,106.5516],[34.2603,108.9480],40,-0.1),{color:'#f0b429',weight:2.5,dashArray:'10 5',opacity:0.9}).addTo(hmap);
+  L.polyline([[34.2603,108.9480],[39.9042,116.4074]],{color:'#f0b429',weight:2.5,dashArray:'10 5',opacity:0.9}).addTo(hmap);
+
+  homeStops.forEach(function(s,i){
+    var pulse='<div style="position:absolute;inset:-8px;border-radius:50%;border:2px solid '+s.color+';animation:pinpulse 2.4s ease-out '+(i*0.45)+'s infinite;opacity:0"></div>';
+    var mk='<div style="display:flex;flex-direction:column;align-items:center;cursor:pointer">'+
+      '<div style="position:relative;width:46px;height:46px;border-radius:50%;background:'+s.color+'1a;border:2.5px solid '+s.color+';display:flex;align-items:center;justify-content:center;font-size:21px;box-shadow:0 0 22px '+s.color+'55">'+s.icon+pulse+'</div>'+
+      '<div style="font-size:10px;font-weight:800;color:#fff;white-space:nowrap;margin-top:5px;text-shadow:0 2px 8px rgba(0,0,0,1)">'+s.label+'</div>'+
+      '</div>';
+    var mk=L.marker(s.latlng,{icon:L.divIcon({html:mk,className:'',iconSize:[110,72],iconAnchor:[55,18]})}).addTo(hmap);
+    (function(stop){mk.on('click',function(){hmapZoomTo(stop);});})(s);
   });
 }
+
+function hmapZoomTo(s){
+  hmapZoomed=true;
+  hmap.flyTo(s.latlng,s.zoom,{animate:true,duration:1.4,easeLinearity:0.25});
+  var legend=document.getElementById('hmap-legend');
+  var hint=document.getElementById('hmap-hint');
+  if(legend) legend.style.opacity='0';
+  if(hint) hint.style.opacity='0';
+  var ol=document.getElementById('hmap-overlay');
+  if(!ol) return;
+  ol.style.display='block';
+  ol.style.borderColor=s.color+'55';
+  document.getElementById('hmap-icon').textContent=s.icon;
+  var nm=document.getElementById('hmap-name');
+  nm.textContent=s.label; nm.style.color=s.color;
+  document.getElementById('hmap-dates').textContent=s.dates;
+  var hl=document.getElementById('hmap-highlights');
+  hl.innerHTML='';
+  s.hi.forEach(function(h){
+    var c=document.createElement('div');
+    c.style.cssText='background:'+s.color+'18;border:1px solid '+s.color+'44;border-radius:20px;padding:4px 11px;font-size:10px;font-weight:600;color:'+s.color+';white-space:nowrap';
+    c.textContent=h; hl.appendChild(c);
+  });
+}
+
+function hmapBack(){
+  hmapZoomed=false;
+  hmap.flyTo([33,115],4,{animate:true,duration:1.2,easeLinearity:0.3});
+  var legend=document.getElementById('hmap-legend');
+  var hint=document.getElementById('hmap-hint');
+  if(legend) legend.style.opacity='1';
+  if(hint) hint.style.opacity='1';
+  var ol=document.getElementById('hmap-overlay');
+  if(ol) ol.style.display='none';
+}
+
 window.addEventListener('load',initHomeMap);
 
 /* ── NAV ──────────────────────────────────────── */
