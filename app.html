@@ -45,15 +45,36 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .rv-arrow{width:100%;height:2px;background:linear-gradient(90deg,transparent,rgba(240,180,41,0.4),transparent)}
 .rv-label{font-size:8px;color:var(--muted);text-align:center}
 /* MAP */
-.map-page-header{padding:16px 20px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.map-city-tabs{display:flex;gap:6px;flex-wrap:wrap}
-.mctab{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--muted);transition:all .2s;user-select:none}
-.mctab:hover{color:var(--text)}
-.map-wrap{height:calc(100vh - 52px - 70px);min-height:380px;position:relative}
+.map-page-header{padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px}
+.map-city-tabs{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.map-city-tabs::-webkit-scrollbar{display:none}
+.mctab{padding:7px 16px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--muted);transition:all .2s;user-select:none;white-space:nowrap;flex-shrink:0}
+.mctab:hover{color:var(--text);border-color:rgba(255,255,255,0.2)}
+.map-filter-bar{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}
+.map-filter-bar::-webkit-scrollbar{display:none}
+.mfilter{padding:4px 12px;border-radius:12px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.04);transition:all .2s;white-space:nowrap;flex-shrink:0;user-select:none}
+.mfilter.active,.mfilter:hover{color:#fff;background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25)}
+.map-wrap{height:calc(100vh - 52px - 108px);min-height:340px;position:relative}
 #map{height:100%;width:100%}
-.map-legend{position:absolute;bottom:12px;left:12px;z-index:999;background:rgba(10,14,26,0.92);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px 12px;pointer-events:none;max-width:200px}
-.leg-item{display:flex;align-items:center;gap:6px;font-size:10px;color:rgba(255,255,255,0.7);margin-bottom:4px}
-.leg-item:last-child{margin-bottom:0}
+.map-pin-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5))}
+.map-pin-body{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;border:2px solid;transition:transform .15s;position:relative}
+.map-pin-body:hover{transform:scale(1.12)}
+.map-pin-tip{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top-width:9px;border-top-style:solid;margin-top:-1px}
+.map-pin-pulse{position:absolute;inset:-6px;border-radius:14px;border:2px solid;animation:pinpulse 2.2s ease-out infinite;opacity:0}
+@keyframes pinpulse{0%{transform:scale(0.85);opacity:.7}100%{transform:scale(1.7);opacity:0}}
+.leaflet-popup-content-wrapper{background:#0e1525;border:1px solid rgba(255,255,255,0.12);border-radius:14px;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.7);padding:0;overflow:hidden}
+.leaflet-popup-tip-container{display:none}
+.leaflet-popup-content{margin:0;width:220px!important}
+.pop-head{padding:12px 14px 10px;border-bottom:1px solid rgba(255,255,255,0.07)}
+.pop-name{font-size:13px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:3px}
+.pop-cat{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+.pop-body{padding:10px 14px 12px}
+.pop-desc{font-size:11px;color:rgba(255,255,255,0.6);line-height:1.65;margin-bottom:8px}
+.pop-day{display:inline-block;font-size:9px;font-weight:700;padding:2px 9px;border-radius:6px;text-transform:uppercase;letter-spacing:.5px}
+.pop-tip{margin-top:8px;padding:7px 10px;background:rgba(255,255,255,0.05);border-radius:8px;border-left:2px solid}
+.pop-tip-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px}
+.pop-tip-text{font-size:10px;color:rgba(255,255,255,0.55);line-height:1.5}
+.map-count-badge{position:absolute;top:10px;right:12px;z-index:999;background:rgba(10,14,26,0.88);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:5px 10px;font-size:10px;color:rgba(255,255,255,0.5);pointer-events:none}
 .leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 /* ITINERARY */
 .city-header{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);cursor:pointer;position:sticky;top:0;z-index:10;transition:filter .2s}
@@ -235,17 +256,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <!-- MAPS -->
 <div class="page" id="page-maps">
   <div class="map-page-header">
-    <div style="font-size:14px;font-weight:700;color:#fff">Mapa Interactivo</div>
     <div class="map-city-tabs">
-      <div class="mctab active" style="background:rgba(74,158,255,0.2);border-color:#4a9eff;color:#4a9eff" onclick="switchMap('shanghai',this)">🇨🇳 Shanghai</div>
+      <div class="mctab active" style="background:rgba(74,158,255,0.15);border-color:#4a9eff;color:#4a9eff" onclick="switchMap('shanghai',this)">🇨🇳 Shanghai</div>
       <div class="mctab" onclick="switchMap('xian',this)">🏺 Xi'an</div>
       <div class="mctab" onclick="switchMap('beijing',this)">🏯 Beijing</div>
       <div class="mctab" onclick="switchMap('seoul',this)">🇰🇷 Seúl</div>
     </div>
+    <div class="map-filter-bar" id="filter-bar"></div>
   </div>
   <div class="map-wrap">
     <div id="map"></div>
-    <div class="map-legend" id="map-legend"></div>
+    <div class="map-count-badge" id="map-count"></div>
   </div>
 </div>
 
@@ -583,151 +604,149 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 </div>
 
 <script>
+/* ── HOME MAP ─────────────────────────────────── */
 function initHomeMap(){
-  if(document.getElementById('home-map')._hmap) return;
-  const hmap=L.map('home-map',{zoomControl:false,scrollWheelZoom:false,dragging:false,touchZoom:false,tap:false,attributionControl:false})
-    .setView([36,118],4);
-  document.getElementById('home-map')._hmap=hmap;
+  var el=document.getElementById('home-map');
+  if(el._hmap) return;
+  var hmap=L.map('home-map',{zoomControl:false,scrollWheelZoom:false,dragging:false,touchZoom:false,tap:false,attributionControl:false}).setView([36,122],4);
+  el._hmap=hmap;
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:10}).addTo(hmap);
-
-  // Ciudades con sus datos
-  const stops=[
-    {latlng:[31.2304,121.4737],color:'#4a9eff',label:'Shanghai',dates:'30 Dic – 3 Ene',icon:'🏙️'},
-    {latlng:[34.2603,108.9480],color:'#ff8c42',label:"Xi'an",dates:'3 – 5 Ene',icon:'🏺'},
-    {latlng:[39.9042,116.4074],color:'#ff4466',label:'Beijing',dates:'5 – 10 Ene',icon:'🏯'},
-    {latlng:[37.5665,126.9780],color:'#9b59b6',label:'Seúl',dates:'10 – 14 Ene',icon:'🇰🇷'},
+  function arc(a,b,n,bend){n=n||40;bend=bend||0.22;var pts=[],ml=(a[0]+b[0])/2+(b[1]-a[1])*bend,mg=(a[1]+b[1])/2-(b[0]-a[0])*bend;for(var i=0;i<=n;i++){var t=i/n;pts.push([(1-t)*(1-t)*a[0]+2*(1-t)*t*ml+t*t*b[0],(1-t)*(1-t)*a[1]+2*(1-t)*t*mg+t*t*b[1]]);}return pts;}
+  L.polyline(arc([37.5665,126.9780],[31.2304,121.4737],40,-0.2),{color:'#9b59b6',weight:2,dashArray:'6 5',opacity:0.75}).addTo(hmap);
+  L.polyline([[31.2304,121.4737],[34.2603,108.9480],[39.9042,116.4074]],{color:'#f0b429',weight:2.5,dashArray:'9 5',opacity:0.85}).addTo(hmap);
+  L.polyline(arc([39.9042,116.4074],[37.5665,126.9780]),{color:'#9b59b6',weight:2,dashArray:'6 5',opacity:0.75}).addTo(hmap);
+  var stops=[
+    {latlng:[37.5665,126.9780],color:'#9b59b6',label:'Seúl',sub:'entrada 30 Dic / salida 14 Ene',icon:'🇰🇷',pulse:true},
+    {latlng:[31.2304,121.4737],color:'#4a9eff',label:'Shanghai',sub:'30 Dic – 3 Ene',icon:'🏙️'},
+    {latlng:[34.2603,108.9480],color:'#ff8c42',label:"Xi'an",sub:'3 – 5 Ene',icon:'🏺'},
+    {latlng:[39.9042,116.4074],color:'#ff4466',label:'Beijing',sub:'5 – 10 Ene',icon:'🏯'},
   ];
-
-  // Línea de tren (Shanghai→Xi'an→Beijing) punteada dorada
-  const trainRoute=[[31.2304,121.4737],[34.2603,108.9480],[39.9042,116.4074]];
-  L.polyline(trainRoute,{color:'#f0b429',weight:2.5,dashArray:'8 5',opacity:0.85}).addTo(hmap);
-
-  // Línea de vuelo Beijing→Seúl: arco curvo generado con puntos intermedios
-  function arcPoints(a,b,n=30,bend=0.18){
-    const pts=[];
-    const mlat=(a[0]+b[0])/2+(b[1]-a[1])*bend;
-    const mlng=(a[1]+b[1])/2-(b[0]-a[0])*bend;
-    for(let i=0;i<=n;i++){
-      const t=i/n;
-      const lat=(1-t)*(1-t)*a[0]+2*(1-t)*t*mlat+t*t*b[0];
-      const lng=(1-t)*(1-t)*a[1]+2*(1-t)*t*mlng+t*t*b[1];
-      pts.push([lat,lng]);
-    }
-    return pts;
-  }
-  L.polyline(arcPoints([39.9042,116.4074],[37.5665,126.9780]),{color:'#9b59b6',weight:2,dashArray:'5 6',opacity:0.8}).addTo(hmap);
-
-  // Marcadores de ciudades
-  stops.forEach((s,i)=>{
-    const pulse=i===0?`<div style="position:absolute;inset:-5px;border-radius:50%;border:2px solid ${s.color};opacity:0.4;animation:pulse 2s ease-out infinite"></div>`:'';
-    const html=`<div style="position:relative;width:36px;height:36px">
-      ${pulse}
-      <div style="width:36px;height:36px;border-radius:50%;background:${s.color}25;border:2.5px solid ${s.color};display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 14px ${s.color}55;backdrop-filter:blur(4px)">${s.icon}</div>
-    </div>`;
-    const icon=L.divIcon({html,className:'',iconSize:[36,36],iconAnchor:[18,18]});
-    L.marker(s.latlng,{icon}).addTo(hmap)
-      .bindTooltip(`<strong>${s.label}</strong><br><span style="color:${s.color};font-size:10px">${s.dates}</span>`,
-        {permanent:false,direction:'top',className:'route-tooltip',offset:[0,-20]});
-
-    // Etiqueta permanente de ciudad
-    L.marker(s.latlng,{
-      icon:L.divIcon({
-        html:`<div style="font-size:10px;font-weight:700;color:#fff;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,0.9);margin-top:22px;margin-left:-14px">${s.label}</div>`,
-        className:'',iconSize:[80,20],iconAnchor:[0,0]
-      })
-    }).addTo(hmap);
+  stops.forEach(function(s){
+    var p=s.pulse?('<div style="position:absolute;inset:-7px;border-radius:50%;border:2px solid '+s.color+';animation:pulse 2s ease-out infinite;opacity:0"></div>'):'';
+    var mk='<div style="display:flex;flex-direction:column;align-items:center"><div style="position:relative;width:40px;height:40px;border-radius:50%;background:'+s.color+'22;border:2.5px solid '+s.color+';display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 0 20px '+s.color+'55">'+s.icon+p+'</div><div style="font-size:10px;font-weight:800;color:#fff;white-space:nowrap;margin-top:5px;text-shadow:0 1px 6px rgba(0,0,0,1)">'+s.label+'</div><div style="font-size:8px;color:'+s.color+';white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,1)">'+s.sub+'</div></div>';
+    L.marker(s.latlng,{icon:L.divIcon({html:mk,className:'',iconSize:[110,72],iconAnchor:[55,20]})}).addTo(hmap);
   });
 }
 window.addEventListener('load',initHomeMap);
+
+/* ── NAV ──────────────────────────────────────── */
 function showPage(id,el){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.ntab').forEach(function(t){t.classList.remove('active');});
   document.getElementById('page-'+id).classList.add('active');
   if(el) el.classList.add('active');
-  if(id==='maps') setTimeout(initMap,100);
+  if(id==='maps') setTimeout(function(){if(!map)initMap();else map.invalidateSize();},120);
 }
-function toggleCity(id){
-  const el=document.getElementById('days-'+id);
-  const arr=document.getElementById('arr-'+id);
-  el.classList.toggle('open');
-  arr.textContent=el.classList.contains('open')?'▼':'▶';
-}
-function toggleDay(id){
-  const body=document.getElementById('body-'+id);
-  const tog=document.getElementById('tog-'+id);
-  body.classList.toggle('open');
-  tog.textContent=body.classList.contains('open')?'▼':'▶';
-}
-let map=null,currentCity='shanghai';
-const cities={
+function toggleCity(id){var e=document.getElementById('days-'+id),a=document.getElementById('arr-'+id);e.classList.toggle('open');a.textContent=e.classList.contains('open')?'▼':'▶';}
+function toggleDay(id){var b=document.getElementById('body-'+id),t=document.getElementById('tog-'+id);b.classList.toggle('open');t.textContent=b.classList.contains('open')?'▼':'▶';}
+
+/* ── CATEGORIES ───────────────────────────────── */
+var CAT={'Imperdible':{color:'#f0b429',icon:'⭐'},'Historia':{color:'#e74c3c',icon:'🏛️'},'Naturaleza':{color:'#2ecc71',icon:'🌿'},'Shopping':{color:'#4a9eff',icon:'🛍️'},'Gastronomía':{color:'#ff8c42',icon:'🍜'},'Entretenimiento':{color:'#9b59b6',icon:'🎭'},'Hotel':{color:'#1abc9c',icon:'🏨'}};
+
+/* ── CITY DATA ────────────────────────────────── */
+var cities={
   shanghai:{center:[31.2304,121.4737],zoom:12,color:'#4a9eff',markers:[
-    {lat:31.2397,lng:121.4900,icon:'★',color:'#f0b429',name:'The Bund / NYE',day:'Día 2',desc:'Nochevieja más épica del viaje'},
-    {lat:31.2274,lng:121.4929,icon:'🏮',color:'#2ecc71',name:'Yu Garden (Yuyuan)',day:'Día 2',desc:'Jardín clásico del s.XVI + Bazar'},
-    {lat:31.2190,lng:121.4470,icon:'🌿',color:'#9b59b6',name:'French Concession',day:'Día 2',desc:'Barrio más cool de Shanghai'},
-    {lat:31.2362,lng:121.4704,icon:'🛍',color:'#f0b429',name:'Nanjing Road Peatonal',day:'Días 1-4',desc:'5.5km, 600 tiendas'},
-    {lat:31.1443,lng:121.6657,icon:'🏰',color:'#ff4466',name:'Shanghai Disney Resort',day:'Día 3',desc:'TRON + Zootopia únicos en el mundo'},
-    {lat:31.2280,lng:121.5000,icon:'🗼',color:'#4a9eff',name:'Shanghai Tower (piso 100)',day:'Día 4',desc:'Vista más alta de China'},
-    {lat:31.2193,lng:121.4730,icon:'X',color:'#ff8c42',name:'Xintiandi',day:'Días 2+4',desc:'Zona boutique, cena, nightlife'},
-    {lat:31.2362,lng:121.5200,icon:'💎',color:'#f0b429',name:'Mercado de Perlas',day:'Día 4',desc:'4 pisos: jade, electrónicos, bisutería'},
+    {lat:31.2397,lng:121.4900,cat:'Imperdible',name:'The Bund',day:'Noche Vieja',desc:'El malecón más icónico de Asia. Edificios coloniales frente al skyline futurista de Pudong. Aquí será el NYE más épico del viaje.',tip:'Llegar a las 10pm para lugar en el frente del río. Hay vendedores de bebidas en la calle.'},
+    {lat:31.2274,lng:121.4929,cat:'Historia',name:'Yu Garden (Yuyuan)',day:'Día 2',desc:'Jardín clásico chino del siglo XVI con pabellones, estanques y el famoso bazar lleno de souvenirs y comida local.',tip:'Bazar abre desde las 9am. Mejor ir temprano antes de que lleguen los grupos turísticos.'},
+    {lat:31.2190,lng:121.4470,cat:'Naturaleza',name:'French Concession',day:'Día 2',desc:'Barrio de plátanos centenarios, cafés de especialidad, tiendas vintage y arquitectura Art Déco. El lado chic de Shanghai.',tip:'Xintiandi está aquí — ideal para cenar y tomar algo por la noche.'},
+    {lat:31.2362,lng:121.4704,cat:'Shopping',name:'Nanjing Road Peatonal',day:'Días 1–4',desc:'5.5 km peatonales con más de 600 tiendas. La avenida comercial más transitada del mundo.',tip:'Cierra a las 10pm. Hay tren ligero gratuito que recorre toda la avenida.'},
+    {lat:31.1443,lng:121.6657,cat:'Entretenimiento',name:'Shanghai Disney Resort',day:'Día 3',desc:'El Disney más nuevo del mundo. Atracciones únicas: TRON Lightcycle Run y Zootopia. Castillo diferente a todos.',tip:'Comprar Express Pass para TRON y Zootopia. Llegar 30 min antes de apertura.'},
+    {lat:31.2280,lng:121.5000,cat:'Imperdible',name:'Shanghai Tower — Piso 118',day:'Día 4',desc:'El segundo edificio más alto del mundo (632m). Ascensor más rápido del planeta: 118 pisos en 55 segundos.',tip:'Tickets en línea (~¥180). Si hay niebla esperar a la tarde que suele despejarse.'},
+    {lat:31.2193,lng:121.4730,cat:'Gastronomía',name:'Xintiandi',day:'Días 2 y 4',desc:'Casas shikumen restauradas llenas de restaurantes internacionales, bares de jazz y boutiques de diseñadores.',tip:'Reservar con antelación para cenar, especialmente la noche de NYE.'},
+    {lat:31.2362,lng:121.5200,cat:'Shopping',name:'Mercado de Perlas (APM)',day:'Día 4',desc:'4 pisos: jade, perlas, electrónicos y souvenirs a precios de mayoreo. Regateo obligatorio.',tip:'Puedes rebajar hasta 60-70% del precio inicial. Llevar efectivo en yuanes.'},
   ]},
   xian:{center:[34.2603,108.9480],zoom:13,color:'#ff8c42',markers:[
-    {lat:34.2600,lng:108.9480,icon:'🔔',color:'#ff8c42',name:'Bell Tower (centro)',day:'Días 5-6',desc:'Centro histórico de Xi\'an'},
-    {lat:34.2655,lng:108.9415,icon:'🕌',color:'#ff8c42',name:'Muslim Quarter (Huimin Jie)',day:'Día 5',desc:'Mercado nocturno + Roujiamo + Shopping'},
-    {lat:34.2603,lng:108.9533,icon:'🧱',color:'#f0b429',name:'Muralla de Xi\'an — Puerta Sur',day:'Día 6',desc:'14km intactos, bici o carrito eléctrico'},
-    {lat:34.3844,lng:109.2730,icon:'⚔️',color:'#ff4466',name:'Guerreros de Terracota',day:'Día 6',desc:'8,000 soldados del 210 a.C.'},
-    {lat:34.2580,lng:108.9478,icon:'🏨',color:'#2ecc71',name:'Zona hotelera recomendada',day:'',desc:'Sofitel/Grand Mercure cerca muralla'},
+    {lat:34.2600,lng:108.9480,cat:'Historia',name:'Bell Tower',day:'Días 5–6',desc:'El corazón histórico de Xi\'an. Torre del siglo XIV perfectamente conservada en el centro de la ciudad.',tip:'Subir al atardecer (~¥30). Las campanas suenan en horarios fijos.'},
+    {lat:34.2655,lng:108.9415,cat:'Gastronomía',name:'Muslim Quarter',day:'Día 5',desc:'El barrio musulmán más famoso de China. Mercado nocturno con cientos de puestos y mezquita central.',tip:'Probar Roujiamo (taco chino) y pinchos de cordero. Mejor de noche.'},
+    {lat:34.2603,lng:108.9533,cat:'Historia',name:'Muralla de Xi\'an',day:'Día 6',desc:'La muralla medieval mejor conservada de China: 14 km de perímetro. Se puede recorrer en bici.',tip:'Rentar bici en la puerta Sur (~¥45/hr). Vuelta completa en ~90 min.'},
+    {lat:34.3844,lng:109.2730,cat:'Imperdible',name:'Guerreros de Terracota',day:'Día 6',desc:'Una de las 8 maravillas del mundo. Más de 8,000 soldados a tamaño real del 210 a.C.',tip:'Contratar guía local (~$20/persona). Ir de mañana temprano.'},
+    {lat:34.2580,lng:108.9478,cat:'Hotel',name:'Zona hotelera recomendada',day:'',desc:'La mejor zona: caminando a Muralla, Bell Tower y Muslim Quarter. Sofitel y Grand Mercure están aquí.',tip:'Pedir habitación con vista a la muralla iluminada. Vale el upgrade.'},
   ]},
-  beijing:{center:[39.9042,116.4074],zoom:11,color:'#ff4466',markers:[
-    {lat:39.9163,lng:116.3972,icon:'🏛️',color:'#ff4466',name:'Ciudad Prohibida (Gugong)',day:'Día 9',desc:'980 edificios, 500 años historia imperial'},
-    {lat:39.9033,lng:116.3975,icon:'🏟',color:'#ff4466',name:'Plaza Tiananmen',day:'Día 9',desc:'La plaza más grande del mundo'},
-    {lat:39.8821,lng:116.4066,icon:'⛩️',color:'#2ecc71',name:'Templo del Cielo',day:'Día 9',desc:'Cúpula azul icónica del s.XV'},
-    {lat:40.4399,lng:116.5650,icon:'🧱',color:'#f0b429',name:'Gran Muralla — Mutianyu',day:'Día 8',desc:'Teleférico + tobogán, menos turistas'},
-    {lat:39.9145,lng:116.4100,icon:'🛍',color:'#f0b429',name:'Wangfujing Street',day:'Día 7',desc:'Calle comercial + snacks exóticos'},
-    {lat:40.0003,lng:116.2755,icon:'🏯',color:'#4a9eff',name:'Palacio de Verano',day:'Día 11',desc:'Lago congelado en enero — épico'},
-    {lat:39.9342,lng:116.4021,icon:'胡',color:'#9b59b6',name:'Nanluoguxiang Hutong',day:'Día 11',desc:'El barrio más cool de Beijing'},
-    {lat:39.9151,lng:116.6666,icon:'🎬',color:'#ff4466',name:'Universal Studios Beijing',day:'Día 10',desc:'Harry Potter más grande del mundo'},
-    {lat:39.9145,lng:116.4478,icon:'👜',color:'#f0b429',name:'Silk Street Market',day:'Día 11',desc:'Regateo intenso, 5 pisos'},
+  beijing:{center:[39.9042,116.4074],zoom:11,color:'#e74c3c',markers:[
+    {lat:39.9163,lng:116.3972,cat:'Imperdible',name:'Ciudad Prohibida',day:'Día 9',desc:'El palacio más grande del mundo: 980 edificios, 9,999 habitaciones, 500 años de historia imperial.',tip:'Tickets en línea (en.dpm.org.cn) — cupo 40,000 personas/día. Reservar con antelación.'},
+    {lat:39.9033,lng:116.3975,cat:'Historia',name:'Plaza Tiananmen',day:'Día 9',desc:'La plaza pública más grande del mundo (440,000 m²). Cambio de guardia al amanecer.',tip:'Cambio de guardia al amanecer exacto (~7:30am en enero). Hacer fila desde las 6:30am.'},
+    {lat:39.8821,lng:116.4066,cat:'Historia',name:'Templo del Cielo',day:'Día 9',desc:'Complejo de templos del siglo XV. La cúpula azul con muralla roja: imagen icónica de Beijing.',tip:'Por las mañanas los jardines se llenan de ancianos haciendo tai-chi. Imperdible.'},
+    {lat:40.4399,lng:116.5650,cat:'Imperdible',name:'Gran Muralla — Mutianyu',day:'Día 8',desc:'La sección más fotogénica y mejor conservada. Teleférico para subir, tobogán para bajar.',tip:'Contratar tour privado o taxi (~¥400 ida y vuelta con espera). Tobogán: ¥55 extra.'},
+    {lat:39.9145,lng:116.4100,cat:'Shopping',name:'Wangfujing Street',day:'Día 7',desc:'La avenida comercial más famosa de Beijing con marcas de lujo y el callejón de snacks exóticos.',tip:'El callejón de snacks (escorpiones vivos) es perfecto para fotos aunque no se coman.'},
+    {lat:40.0003,lng:116.2755,cat:'Historia',name:'Palacio de Verano',day:'Día 8',desc:'Enorme palacio imperial con lago artificial de 220 ha. En enero el lago suele estar congelado.',tip:'Con nieve en enero es especialmente hermoso. Combinar con visita a la Gran Muralla.'},
+    {lat:39.9342,lng:116.4021,cat:'Naturaleza',name:'Hutong Nanluoguxiang',day:'Día 8',desc:'El barrio tradicional más cool de Beijing: callejuelas hutong del siglo XIII con cafés indie.',tip:'Explorar a pie sin tour. Doblar en las callejuelas laterales donde vive gente real.'},
+    {lat:39.9151,lng:116.6666,cat:'Entretenimiento',name:'Universal Studios Beijing',day:'Día 10',desc:'El parque temático más nuevo de Asia (2021). Área de Harry Potter más grande del mundo.',tip:'Comprar Universal Express Pass para Harry Potter. La zona de Hogsmeade es épica.'},
+    {lat:39.9145,lng:116.4478,cat:'Shopping',name:'Silk Street Market',day:'Día 8',desc:'Mercado de 5 pisos: seda, ropa y accesorios. Famoso por el regateo intenso.',tip:'Regatear siempre. Mínimo 50% de descuento sobre el primer precio. Llevar efectivo.'},
   ]},
   seoul:{center:[37.5665,126.9780],zoom:12,color:'#9b59b6',markers:[
-    {lat:37.5796,lng:126.9770,icon:'🏯',color:'#2ecc71',name:'Gyeongbokgung Palace',day:'Día 13',desc:'Cambio guardia 10am · Hanbok = gratis'},
-    {lat:37.5829,lng:126.9854,icon:'🏘',color:'#ff8c42',name:'Bukchon Hanok Village',day:'Día 13',desc:'La calle más fotogénica de Corea'},
-    {lat:37.5636,lng:126.9836,icon:'💄',color:'#ff4466',name:'Myeongdong',day:'Día 13',desc:'K-beauty capital del mundo'},
-    {lat:37.5512,lng:126.9882,icon:'🗼',color:'#9b59b6',name:'N Seoul Tower',day:'Día 14',desc:'Vistas 360° + candados del amor'},
-    {lat:37.5572,lng:126.9245,icon:'🎵',color:'#4a9eff',name:'Hongdae',day:'Día 14',desc:'K-pop, streetwear, ARTBOX, HYBE'},
-    {lat:37.5128,lng:127.0588,icon:'🏬',color:'#f0b429',name:'COEX + Starfield Library',day:'Día 15',desc:'Mall más grande Asia + foto icónica'},
-    {lat:37.5700,lng:127.0077,icon:'🥘',color:'#2ecc71',name:'Mercado Gwangjang',day:'Día 14',desc:'Famoso Netflix, desde 1905'},
-    {lat:37.5319,lng:126.9635,icon:'📱',color:'#4a9eff',name:'Yongsan Electronics',day:'Día 15',desc:'Samsung/LG a precio de fábrica'},
-    {lat:37.5706,lng:127.0098,icon:'🌙',color:'#9b59b6',name:'Dongdaemun DDP (Zaha Hadid)',day:'Día 15',desc:'Arquitectura futurista + moda 24h'},
+    {lat:37.5796,lng:126.9770,cat:'Imperdible',name:'Gyeongbokgung Palace',day:'Día 13',desc:'El palacio más majestuoso de la dinastía Joseon. Cambio de guardia a las 10am y 2pm.',tip:'Rentar Hanbok en Anguk (~₩20,000) y la entrada al palacio es gratis.'},
+    {lat:37.5829,lng:126.9854,cat:'Historia',name:'Bukchon Hanok Village',day:'Día 13',desc:'Barrio de 600+ casas tradicionales hanok. La calle Gahoe-ro es la más fotogénica de Corea.',tip:'Ir antes de las 9am para fotos sin gente. Los residentes viven aquí — respetar silencio.'},
+    {lat:37.5636,lng:126.9836,cat:'Shopping',name:'Myeongdong',day:'Día 13',desc:'La capital mundial del K-beauty. Cientos de tiendas de skincare y maquillaje a precios duty-free.',tip:'COSRX, Innisfree, Etude House están aquí. Comprar sets de regalo salen más económicos.'},
+    {lat:37.5512,lng:126.9882,cat:'Imperdible',name:'N Seoul Tower (Namsan)',day:'Día 14',desc:'Torre sobre el Monte Namsan con vistas 360° de toda la ciudad. Los candados del amor son icónicos.',tip:'Subir en teleférico (₩9,000) o caminando 40 min. Ir al atardecer para ver la ciudad encenderse.'},
+    {lat:37.5572,lng:126.9245,cat:'Entretenimiento',name:'Hongdae',day:'Día 14',desc:'Epicentro de la cultura joven coreana: K-pop, streetwear, ARTBOX, HYBE Insight Museum.',tip:'HYBE Insight (museo BTS) requiere reserva online con semanas de antelación.'},
+    {lat:37.5128,lng:127.0588,cat:'Shopping',name:'COEX + Starfield Library',day:'Día 15',desc:'El mall subterráneo más grande de Asia. La Starfield Library es la foto más viral de Seúl.',tip:'La librería es gratuita. Mejor foto a las 10am antes de que se llene de gente.'},
+    {lat:37.5700,lng:127.0077,cat:'Gastronomía',name:'Mercado Gwangjang',day:'Día 14',desc:'El mercado de comida más antiguo de Seúl (1905), famoso por aparecer en Netflix.',tip:'Buscar el puesto 10 — la abuela más famosa del mercado. Ir con mucha hambre.'},
+    {lat:37.5319,lng:126.9635,cat:'Shopping',name:'Yongsan Electronics',day:'Día 15',desc:'El distrito electrónico más grande de Asia. Samsung y LG directamente de fábrica.',tip:'Comparar precios entre tiendas. Llevar fotos del producto — los vendedores hablan poco inglés.'},
+    {lat:37.5706,lng:127.0098,cat:'Entretenimiento',name:'Dongdaemun DDP',day:'Día 15',desc:'Edificio Zaha Hadid: una nave espacial plateada. Moda 24 horas, mercado nocturno y galerías.',tip:'Las tiendas de moda al mayoreo abren de noche hasta las 5am. Único en el mundo.'},
   ]},
 };
-function initMap(){
-  if(map) return;
-  map=L.map('map',{zoomControl:true,touchZoom:false,tap:false,scrollWheelZoom:false}).setView([31.2304,121.4737],12);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB · © OSM contributors',maxZoom:19}).addTo(map);
-  renderMarkers('shanghai');
+
+var map=null, activeCity='shanghai', activeFilter='Todos', cityMarkers=[];
+
+function makePin(m,cc){var c=CAT[m.cat]||{color:cc,icon:'📍'};return '<div class="map-pin-wrap"><div class="map-pin-body" style="background:'+c.color+'18;border-color:'+c.color+';box-shadow:0 0 18px '+c.color+'44"><div class="map-pin-pulse" style="border-color:'+c.color+'"></div><span style="font-size:17px;line-height:1">'+c.icon+'</span></div><div class="map-pin-tip" style="border-top-color:'+c.color+'"></div></div>';}
+
+function makePopup(m,cc){
+  var c=CAT[m.cat]||{color:cc,icon:'📍'}, col=c.color;
+  var t=m.tip?('<div class="pop-tip" style="border-left-color:'+col+'"><div class="pop-tip-label" style="color:'+col+'">💡 Tip</div><div class="pop-tip-text">'+m.tip+'</div></div>'):'';
+  var d=m.day?('<span class="pop-day" style="background:'+col+'20;color:'+col+'">'+m.day+'</span>'):'';
+  return '<div class="pop-head" style="border-left:3px solid '+col+'"><div class="pop-name">'+m.name+'</div><div class="pop-cat" style="color:'+col+'">'+c.icon+' '+m.cat+'</div></div><div class="pop-body"><div class="pop-desc">'+m.desc+'</div>'+d+t+'</div>';
 }
+
+function buildFilterBar(city){
+  var cats=['Todos'], seen={};
+  cities[city].markers.forEach(function(m){if(!seen[m.cat]){seen[m.cat]=1;cats.push(m.cat);}});
+  var bar=document.getElementById('filter-bar');
+  if(!bar) return;
+  while(bar.firstChild) bar.removeChild(bar.firstChild);
+  cats.forEach(function(cat){
+    var btn=document.createElement('div');
+    btn.className='mfilter'+(cat===activeFilter?' active':'');
+    btn.textContent=(cat==='Todos'?'🗺️ Todos':(CAT[cat]?CAT[cat].icon+' ':'')+cat);
+    btn.onclick=(function(c){return function(){applyFilter(c);};})(cat);
+    bar.appendChild(btn);
+  });
+}
+
+function applyFilter(cat){activeFilter=cat;renderMarkers(activeCity);}
+
 function renderMarkers(city){
   if(!map) return;
-  map.eachLayer(l=>{ if(l instanceof L.Marker) map.removeLayer(l); });
-  const c=cities[city];
-  map.setView(c.center,c.zoom);
-  c.markers.forEach(m=>{
-    const txt=m.icon.length>2?`<span style="font-size:11px;font-weight:800;color:${m.color}">${m.icon}</span>`:m.icon;
-    const div=`<div style="width:32px;height:32px;border-radius:50%;background:${m.color}20;border:2px solid ${m.color};display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,0.6);cursor:pointer">${txt}</div>`;
-    const icon=L.divIcon({html:div,className:'',iconSize:[32,32],iconAnchor:[16,16]});
-    L.marker([m.lat,m.lng],{icon}).addTo(map).bindPopup(
-      `<div class="popup-title">${m.name}</div><div class="popup-sub">${m.desc}</div>${m.day?`<span class="popup-day" style="background:${m.color}20;color:${m.color}">${m.day}</span>`:''}`
-    );
+  activeCity=city;
+  cityMarkers.forEach(function(m){map.removeLayer(m);});
+  cityMarkers=[];
+  var c=cities[city];
+  map.setView(c.center,c.zoom,{animate:true,duration:0.6});
+  var filtered=c.markers.filter(function(m){return activeFilter==='Todos'||m.cat===activeFilter;});
+  filtered.forEach(function(m){
+    var icon=L.divIcon({html:makePin(m,c.color),className:'',iconSize:[38,55],iconAnchor:[19,55]});
+    var mk=L.marker([m.lat,m.lng],{icon:icon}).addTo(map);
+    mk.bindPopup(makePopup(m,c.color),{maxWidth:240,minWidth:220,className:'',closeButton:false,autoPanPadding:[20,80]});
+    cityMarkers.push(mk);
   });
-  const leg=document.getElementById('map-legend');
-  if(leg) leg.innerHTML='<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Lugares</div>'+
-    c.markers.slice(0,5).map(m=>`<div class="leg-item"><div class="leg-dot" style="background:${m.color}"></div><span>${m.name.substring(0,22)}</span></div>`).join('');
+  var badge=document.getElementById('map-count');
+  if(badge) badge.textContent=filtered.length+' lugar'+(filtered.length!==1?'es':'');
+  buildFilterBar(city);
 }
+
+function initMap(){
+  if(map){map.invalidateSize();return;}
+  map=L.map('map',{zoomControl:true,touchZoom:false,tap:false,scrollWheelZoom:false}).setView([31.2304,121.4737],12);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB · © OSM contributors',maxZoom:19}).addTo(map);
+  activeFilter='Todos';
+  renderMarkers('shanghai');
+}
+
 function switchMap(city,el){
-  document.querySelectorAll('.mctab').forEach(t=>{t.style.background='';t.style.borderColor='';t.style.color='';t.classList.remove('active');});
-  const c=cities[city];
-  el.style.background=c.color+'22';el.style.borderColor=c.color;el.style.color=c.color;el.classList.add('active');
-  if(map) renderMarkers(city); else { currentCity=city; initMap(); }
+  document.querySelectorAll('.mctab').forEach(function(t){t.style.background='';t.style.borderColor='';t.style.color='';t.classList.remove('active');});
+  var c=cities[city];
+  el.style.background=c.color+'18';el.style.borderColor=c.color;el.style.color=c.color;el.classList.add('active');
+  activeFilter='Todos';
+  if(map) renderMarkers(city); else {activeCity=city;initMap();}
 }
 </script>
 </body>
