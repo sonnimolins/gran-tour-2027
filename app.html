@@ -691,13 +691,12 @@ function showPage(id,el){
     setTimeout(function(){
       if(!map){initMap();}
       else{
-        var mapEl=document.getElementById('map');
-        void mapEl.offsetHeight; // force reflow before measuring
-        map.invalidateSize(true);
+        void document.getElementById('map').offsetHeight;
+        map.invalidateSize({animate:false,pan:false});
+        var c=cities[activeCity];
+        map.setView(c.center,c.zoom,{animate:false});
       }
-    },200);
-  } else if(map){
-    map.off();map.remove();map=null;cityMarkers=[];
+    },250);
   }
 }
 function toggleCity(id){var e=document.getElementById('days-'+id),a=document.getElementById('arr-'+id);e.classList.toggle('open');a.textContent=e.classList.contains('open')?'▼':'▶';if(map)setTimeout(function(){map.invalidateSize(true);},300);}
@@ -808,13 +807,30 @@ function renderMarkers(city){
 }
 
 function initMap(){
-  if(map){map.invalidateSize(true);return;}
-  map=L.map('map',{zoomControl:true,touchZoom:false,tap:false,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false}).setView([31.2304,121.4737],12);
+  if(map){
+    map.invalidateSize({animate:false,pan:false});
+    var c=cities[activeCity];map.setView(c.center,c.zoom,{animate:false});
+    return;
+  }
+  var city=activeCity||'shanghai';
+  map=L.map('map',{zoomControl:true,touchZoom:false,tap:false,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false}).setView(cities[city].center,cities[city].zoom);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB · © OSM contributors',maxZoom:19}).addTo(map);
   activeFilter='Todos';
-  renderMarkers(activeCity||'shanghai');
-  window.addEventListener('orientationchange',function(){setTimeout(function(){if(map)map.invalidateSize(true);},400);});
-  window.addEventListener('resize',function(){if(map)map.invalidateSize(true);});
+  requestAnimationFrame(function(){
+    map.invalidateSize({animate:false,pan:false});
+    renderMarkers(city);
+  });
+  window.addEventListener('orientationchange',function(){
+    setTimeout(function(){
+      if(!map)return;
+      map.invalidateSize({animate:false,pan:false});
+      var c=cities[activeCity];map.setView(c.center,c.zoom,{animate:false});
+    },400);
+  });
+  window.addEventListener('resize',function(){
+    if(!map)return;
+    map.invalidateSize({animate:false,pan:false});
+  });
 }
 
 function switchMap(city,el){
