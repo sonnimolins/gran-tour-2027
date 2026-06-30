@@ -10,7 +10,7 @@
 :root{--gold:#f0b429;--blue:#4a9eff;--red:#ff4466;--orange:#ff8c42;--purple:#9b59b6;--green:#2ecc71;--bg:#0a0e1a;--bg2:#111827;--bg3:#1a2235;--border:rgba(255,255,255,0.08);--text:rgba(255,255,255,0.85);--muted:rgba(255,255,255,0.4)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-.nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(10,14,26,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0;height:52px}
+.nav{position:sticky;top:0;left:0;right:0;z-index:1000;background:rgba(10,14,26,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0;height:52px}
 .nav-logo{padding:0 18px;font-size:14px;font-weight:700;color:var(--gold);white-space:nowrap;flex-shrink:0}
 .nav-logo span{color:rgba(255,255,255,0.5);font-weight:400}
 .nav-tabs{display:flex;overflow-x:auto;flex:1;scrollbar-width:none}
@@ -18,7 +18,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .ntab{padding:0 14px;height:52px;display:flex;align-items:center;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px;user-select:none}
 .ntab:hover{color:var(--text)}
 .ntab.active{color:var(--gold);border-bottom-color:var(--gold)}
-.page{display:none;padding-top:52px;min-height:100vh}
+.page{display:none;min-height:100vh}
 .page.active{display:block}
 /* HOME */
 .hero{background:linear-gradient(135deg,#0a0e1a 0%,#0f1e35 50%,#1a0d2e 100%);padding:48px 24px 36px;text-align:center;position:relative;overflow:hidden}
@@ -56,7 +56,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .leg-item:last-child{margin-bottom:0}
 .leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 /* ITINERARY */
-.city-header{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);cursor:pointer;position:sticky;top:52px;z-index:10;transition:filter .2s}
+.city-header{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);cursor:pointer;position:sticky;top:0;z-index:10;transition:filter .2s}
 .city-header:hover{filter:brightness(1.1)}
 .ch-flag{font-size:22px}
 .ch-info{flex:1}
@@ -553,7 +553,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <script>
 function initHomeMap(){
   if(document.getElementById('home-map')._hmap) return;
-  const hmap=L.map('home-map',{zoomControl:false,scrollWheelZoom:false,dragging:true,attributionControl:false})
+  const hmap=L.map('home-map',{zoomControl:false,scrollWheelZoom:false,dragging:false,touchZoom:false,tap:false,attributionControl:false})
     .setView([36,118],4);
   document.getElementById('home-map')._hmap=hmap;
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:10}).addTo(hmap);
@@ -670,7 +670,7 @@ const cities={
 };
 function initMap(){
   if(map) return;
-  map=L.map('map',{zoomControl:true}).setView([31.2304,121.4737],12);
+  map=L.map('map',{zoomControl:true,touchZoom:false,tap:false,scrollWheelZoom:false}).setView([31.2304,121.4737],12);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB · © OSM contributors',maxZoom:19}).addTo(map);
   renderMarkers('shanghai');
 }
