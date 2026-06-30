@@ -167,6 +167,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <div style="position:absolute;top:12px;left:12px;z-index:999;background:rgba(10,14,26,0.9);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 14px;pointer-events:none">
       <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Ruta del viaje</div>
       <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#9b59b6;flex-shrink:0"></div>Seúl · entrada 30 Dic</div>
         <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#4a9eff;flex-shrink:0"></div>Shanghai · 30 Dic–3 Ene</div>
         <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#ff8c42;flex-shrink:0"></div>Xi'an · 3–5 Ene</div>
         <div style="display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)"><div style="width:10px;height:10px;border-radius:50%;background:#ff4466;flex-shrink:0"></div>Beijing · 5–10 Ene</div>
@@ -177,9 +178,38 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <div id="home-map" style="height:380px;width:100%"></div>
   </div>
 
+  <!-- INFO VUELOS -->
+  <div style="margin:16px 16px 0;background:rgba(240,180,41,0.07);border:1px solid rgba(240,180,41,0.25);border-radius:14px;padding:14px 16px">
+    <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">✈ Vuelos Aeromexico · Business Class</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-size:12px;font-weight:700;color:#fff">AM 0090 · Ida</span>
+          <span style="font-size:9px;font-weight:700;background:rgba(74,158,255,0.15);color:#4a9eff;padding:2px 8px;border-radius:6px">28 Dic 2026</span>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.6)">MEX T2 <span style="font-weight:700;color:#fff">20:00</span> → MTY → ICN T2 <span style="font-weight:700;color:#fff">06:10 +2</span></div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:3px">17h 50m · 1 escala MTY · Boeing 787-9</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-size:12px;font-weight:700;color:#fff">AM 0091 · Regreso</span>
+          <span style="font-size:9px;font-weight:700;background:rgba(155,89,182,0.15);color:#9b59b6;padding:2px 8px;border-radius:6px">14 Ene 2027</span>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.6)">ICN T2 <span style="font-weight:700;color:#fff">11:40</span> → MEX T2 <span style="font-weight:700;color:#fff">10:35</span></div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:3px">13h 55m · Sin escala · Boeing 787-9</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:10px;color:rgba(255,255,255,0.4)">Código de confirmación</span>
+      <span style="font-size:13px;font-weight:800;color:var(--gold);letter-spacing:2px">ULSGPZ</span>
+    </div>
+  </div>
+
   <div class="route-visual">
-    <div class="rv-city"><div class="rv-dot" style="border-color:#aaa;background:#0a0e1a"></div><div class="rv-code" style="color:#aaa">MEX</div><div class="rv-name">Ciudad de México</div><div class="rv-date" style="color:#aaa">28 Dic · 8pm</div></div>
-    <div class="rv-line"><div class="rv-arrow"></div><div class="rv-label">✈ 14h</div></div>
+    <div class="rv-city"><div class="rv-dot" style="border-color:#aaa;background:#0a0e1a"></div><div class="rv-code" style="color:#aaa">MEX</div><div class="rv-name">Ciudad de México</div><div class="rv-date" style="color:#aaa">28 Dic · 20:00</div></div>
+    <div class="rv-line"><div class="rv-arrow"></div><div class="rv-label">✈ AM0090</div></div>
+    <div class="rv-city"><div class="rv-dot" style="border-color:#9b59b6;background:rgba(155,89,182,0.2)"></div><div class="rv-code" style="color:#9b59b6">ICN</div><div class="rv-name">Seúl (tránsito)</div><div class="rv-date" style="color:#9b59b6">30 Dic · 06:10</div></div>
+    <div class="rv-line"><div class="rv-arrow"></div><div class="rv-label">✈ conexión</div></div>
     <div class="rv-city"><div class="rv-dot" style="border-color:#4a9eff;background:rgba(74,158,255,0.2)"></div><div class="rv-code" style="color:#4a9eff">PVG</div><div class="rv-name">Shanghai</div><div class="rv-date" style="color:#4a9eff">30 Dic–3 Ene</div></div>
     <div class="rv-line"><div class="rv-arrow"></div><div class="rv-label">🚄 5.5h</div></div>
     <div class="rv-city"><div class="rv-dot" style="border-color:#ff8c42;background:rgba(255,140,66,0.2)"></div><div class="rv-code" style="color:#ff8c42">XIY</div><div class="rv-name">Xi'an</div><div class="rv-date" style="color:#ff8c42">3–5 Ene</div></div>
@@ -187,8 +217,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <div class="rv-city"><div class="rv-dot" style="border-color:#ff4466;background:rgba(255,68,102,0.2)"></div><div class="rv-code" style="color:#ff4466">PEK</div><div class="rv-name">Beijing</div><div class="rv-date" style="color:#ff4466">5–10 Ene</div></div>
     <div class="rv-line"><div class="rv-arrow"></div><div class="rv-label">✈ 2h</div></div>
     <div class="rv-city"><div class="rv-dot" style="border-color:#9b59b6;background:rgba(155,89,182,0.2)"></div><div class="rv-code" style="color:#9b59b6">ICN</div><div class="rv-name">Seúl</div><div class="rv-date" style="color:#9b59b6">10–14 Ene</div></div>
-    <div class="rv-line"><div class="rv-arrow"></div><div class="rv-label">✈ regreso</div></div>
-    <div class="rv-city"><div class="rv-dot" style="border-color:#aaa;background:#0a0e1a"></div><div class="rv-code" style="color:#aaa">MEX</div><div class="rv-name">Ciudad de México</div><div class="rv-date" style="color:#aaa">14 Ene · 11:40am</div></div>
+    <div class="rv-line"><div class="rv-arrow"></div><div class="rv-label">✈ AM0091</div></div>
+    <div class="rv-city"><div class="rv-dot" style="border-color:#aaa;background:#0a0e1a"></div><div class="rv-code" style="color:#aaa">MEX</div><div class="rv-name">Ciudad de México</div><div class="rv-date" style="color:#aaa">14 Ene · 11:40</div></div>
   </div>
   <div class="section-title">👨‍👩‍👧‍👦 Viajeros</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px 20px">
