@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="description" content="Guía de viaje familiar — Gran Tour China & Corea, diciembre 2026 a enero 2027">
 <title>Nuestro Gran Tour — China & Corea 2026-2027</title>
+<script>document.documentElement.className='js';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700;900&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -176,6 +177,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
 .stat-card:hover{border-color:rgba(201,168,76,0.35)}
 .rpill{transition:border-color .2s,background .2s}
 .rpill:hover{border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.09)}
+/* ===== CINEMATIC / 3D ENGINE ===== */
+html.js .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.16,.84,.44,1),transform .8s cubic-bezier(.16,.84,.44,1)}
+html.js .reveal.in{opacity:1;transform:none}
+html.js .reveal-soft{opacity:0;transition:opacity .75s ease}
+html.js .reveal-soft.in{opacity:1}
+.reveal.d1{transition-delay:.06s}.reveal.d2{transition-delay:.13s}.reveal.d3{transition-delay:.2s}.reveal.d4{transition-delay:.27s}
+html.js .reveal.tilt{transition:transform .25s cubic-bezier(.16,.84,.44,1),opacity .7s ease,border-color .25s,box-shadow .25s}
+html.js .hero-fade{opacity:0;transform:scale(1.05);transition:opacity 1.1s ease,transform 1.5s cubic-bezier(.16,.84,.44,1)}
+html.js .hero-fade.in{opacity:1;transform:none}
+html.js .map-stage{opacity:0;transform:perspective(1400px) rotateX(28deg) scale(.9);transform-origin:50% 100%;filter:blur(3px);transition:opacity 1s ease,transform 1.15s cubic-bezier(.16,.84,.44,1),filter 1s ease}
+html.js .map-stage.in{opacity:1;transform:none;filter:none}
+/* Flight cinema */
+.flight-cinema{position:relative;height:158px;margin:16px 16px 0;border-radius:16px;overflow:hidden;border:1px solid rgba(201,168,76,0.22);background:linear-gradient(165deg,#210808 0%,#2c0b0b 55%,#150505 100%);box-shadow:inset 0 0 60px rgba(0,0,0,0.5)}
+.fc-arc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.fc-plane{position:absolute;left:2%;top:78%;display:flex;align-items:center;gap:0;transform:translate(-50%,-50%) scale(.5);opacity:0;white-space:nowrap;will-change:left,top,transform,opacity;z-index:3}
+.fc-jet{font-size:26px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6))}
+.fc-ribbon{font-size:9px;font-weight:800;letter-spacing:1px;color:#0e0404;background:linear-gradient(90deg,#e9cf7d,#c9a84c);padding:3px 8px;border-radius:5px 0 0 5px;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.flight-cinema.play .fc-plane{animation:fcFly 5.4s cubic-bezier(.42,0,.2,1) .25s forwards}
+@keyframes fcFly{0%{left:2%;top:78%;transform:translate(-50%,-50%) scale(.5) rotate(-4deg);opacity:0}12%{opacity:1}50%{left:50%;top:24%;transform:translate(-50%,-50%) scale(1) rotate(-9deg);opacity:1}86%{opacity:1}100%{left:99%;top:52%;transform:translate(-50%,-50%) scale(1.22) rotate(-3deg);opacity:0}}
+.fc-title{position:absolute;top:11px;left:16px;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(201,168,76,0.75);font-family:'Noto Serif SC',serif;z-index:2}
+.fc-label{position:absolute;font-size:11px;font-weight:800;text-shadow:0 2px 8px #000;z-index:2}
+.fc-from{left:16px;bottom:32px;color:#c9a84c}
+.fc-to{right:16px;top:34px;color:#b58fd0}
+.fc-caption{position:absolute;left:0;right:0;bottom:11px;text-align:center;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);z-index:2}
+@media(prefers-reduced-motion:reduce){
+  html.js .reveal,html.js .reveal-soft,html.js .hero-fade,html.js .map-stage{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}
+  .fc-plane{opacity:1!important;left:52%!important;top:44%!important;transform:translate(-50%,-50%) scale(1)!important;animation:none!important}
+}
 </style>
 </head>
 <body>
@@ -192,7 +221,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
 
 <!-- HOME -->
 <div class="page active" id="page-home">
-  <div class="hero">
+  <div class="hero hero-fade">
     <div class="hero-kanji" aria-hidden="true" style="font-size:170px;top:-30px;left:-15px">旅</div>
     <div class="hero-kanji" aria-hidden="true" style="font-size:110px;bottom:-20px;right:-8px">游</div>
     <div style="font-size:36px;margin-bottom:12px">🇨🇳 🇰🇷</div>
@@ -218,10 +247,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
       <div class="rpill"><div class="rpill-dot" style="background:#aaa"></div><span style="color:#aaa">MEX</span></div>
     </div>
     <div class="stats-grid">
-      <div class="stat-card" data-k="夜"><div class="stat-v" style="color:var(--gold)">15</div><div class="stat-l">Noches</div></div>
-      <div class="stat-card" data-k="市"><div class="stat-v" style="color:var(--blue)">5</div><div class="stat-l">Ciudades</div></div>
-      <div class="stat-card" data-k="苑"><div class="stat-v" style="color:var(--red)">2</div><div class="stat-l">Parques</div></div>
-      <div class="stat-card" data-k="慶"><div class="stat-v" style="color:var(--green)">1</div><div class="stat-l">NYE épico</div></div>
+      <div class="stat-card reveal d1 tilt" data-k="夜"><div class="stat-v" style="color:var(--gold)">15</div><div class="stat-l">Noches</div></div>
+      <div class="stat-card reveal d2 tilt" data-k="市"><div class="stat-v" style="color:var(--blue)">5</div><div class="stat-l">Ciudades</div></div>
+      <div class="stat-card reveal d3 tilt" data-k="苑"><div class="stat-v" style="color:var(--red)">2</div><div class="stat-l">Parques</div></div>
+      <div class="stat-card reveal d4 tilt" data-k="慶"><div class="stat-v" style="color:var(--green)">1</div><div class="stat-l">NYE épico</div></div>
     </div>
     <div class="alert-box">
       <div class="alert-title">⚠️ Acción requerida — Visa China</div>
@@ -229,7 +258,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
     </div>
   </div>
   <!-- MAPA RUTA INICIO -->
-  <div style="position:relative;border-bottom:1px solid var(--border)">
+  <div class="map-stage" style="position:relative;border-bottom:1px solid var(--border)">
     <!-- Leyenda overview -->
     <div id="hmap-legend" style="position:absolute;top:12px;left:12px;z-index:999;background:rgba(10,14,26,0.9);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 14px;pointer-events:none;transition:opacity .4s">
       <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Ruta del viaje</div>
@@ -261,8 +290,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
     <div id="home-map" style="height:410px;width:100%"></div>
   </div>
 
+  <!-- CINEMÁTICA VUELO -->
+  <div class="flight-cinema reveal">
+    <svg class="fc-arc" viewBox="0 0 400 158" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M22,122 Q200,18 378,86" fill="none" stroke="rgba(201,168,76,0.32)" stroke-width="1.4" stroke-dasharray="3 7" stroke-linecap="round"/>
+      <circle cx="22" cy="122" r="4.5" fill="#c9a84c"/>
+      <circle cx="378" cy="86" r="4.5" fill="#9b59b6"/>
+    </svg>
+    <div class="fc-title">✈ Nuestros vuelos · Aeroméxico</div>
+    <div class="fc-plane"><span class="fc-ribbon">AM&nbsp;0090</span><span class="fc-jet">✈️</span></div>
+    <div class="fc-label fc-from">🇲🇽 MEX · 28 Dic</div>
+    <div class="fc-label fc-to">30 Dic · ICN 🇰🇷</div>
+    <div class="fc-caption">Ida AM0090 &nbsp;·&nbsp; Regreso AM0091 &nbsp;·&nbsp; Business · 787-9</div>
+  </div>
   <!-- INFO VUELOS -->
-  <div style="margin:16px 16px 0;background:rgba(240,180,41,0.07);border:1px solid rgba(240,180,41,0.25);border-radius:14px;padding:14px 16px">
+  <div class="reveal tilt" style="margin:16px 16px 0;background:rgba(240,180,41,0.07);border:1px solid rgba(240,180,41,0.25);border-radius:14px;padding:14px 16px">
     <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">✈ Vuelos Aeromexico · Business Class</div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 12px">
@@ -288,7 +330,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
     </div>
   </div>
 
-  <div class="route-visual">
+  <div class="route-visual reveal-soft">
     <div class="rv-city"><div class="rv-dot" style="border-color:#aaa;background:#0a0e1a"></div><div class="rv-code" style="color:#aaa">MEX</div><div class="rv-name">Ciudad de México</div><div class="rv-date" style="color:#aaa">28 Dic · 20:00</div></div>
     <div class="rv-line"><div class="rv-arrow"></div><div class="rv-label">✈ AM0090</div></div>
     <div class="rv-city"><div class="rv-dot" style="border-color:#9b59b6;background:rgba(155,89,182,0.2)"></div><div class="rv-code" style="color:#9b59b6">ICN</div><div class="rv-name">Seúl (tránsito)</div><div class="rv-date" style="color:#9b59b6">30 Dic · 06:10</div></div>
@@ -306,7 +348,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
     <div class="rv-city"><div class="rv-dot" style="border-color:#aaa;background:#0a0e1a"></div><div class="rv-code" style="color:#aaa">MEX</div><div class="rv-name">Ciudad de México</div><div class="rv-date" style="color:#aaa">14 Ene · 11:40</div></div>
   </div>
   <div class="section-title">👨‍👩‍👧‍👦 Viajeros</div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px 20px">
+  <div class="reveal" style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px 20px">
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;text-align:center;min-width:110px"><div style="font-size:22px">🕺</div><div style="font-size:12px;font-weight:700;margin-top:4px">Luis Angel</div><div style="font-size:10px;color:var(--muted)">El jefe del viaje</div></div>
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;text-align:center;min-width:110px"><div style="font-size:22px">💃</div><div style="font-size:12px;font-weight:700;margin-top:4px">Patricia</div><div style="font-size:10px;color:var(--muted)">La reina del shopping</div></div>
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;text-align:center;min-width:110px"><div style="font-size:22px">🐼</div><div style="font-size:12px;font-weight:700;margin-top:4px">Madeleine</div><div style="font-size:10px;color:var(--muted)">Quiere ver pandas</div></div>
@@ -337,7 +379,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
 <div class="page" id="page-itinerary">
 
   <!-- SHANGHAI -->
-  <div class="city-section">
+  <div class="city-section reveal-soft">
     <div class="city-header" style="background:linear-gradient(rgba(74,158,255,0.07),rgba(74,158,255,0.07)),#0e0404" onclick="toggleCity('sh')">
       <div class="ch-flag">🇨🇳</div>
       <div class="ch-info">
@@ -429,7 +471,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
 
   <div class="orn-div" aria-hidden="true"><div class="orn-line"></div><div class="orn-txt"><div class="orn-dia"></div>重庆<div class="orn-dia"></div></div><div class="orn-line"></div></div>
   <!-- CHONGQING -->
-  <div class="city-section">
+  <div class="city-section reveal-soft">
     <div class="city-header" style="background:linear-gradient(rgba(46,204,113,0.07),rgba(46,204,113,0.07)),#0e0404" onclick="toggleCity('cq')">
       <div class="ch-flag">🐼</div>
       <div class="ch-info">
@@ -485,7 +527,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
 
   <!-- XI'AN -->
   <div class="orn-div" aria-hidden="true"><div class="orn-line"></div><div class="orn-txt"><div class="orn-dia"></div>西安<div class="orn-dia"></div></div><div class="orn-line"></div></div>
-  <div class="city-section">
+  <div class="city-section reveal-soft">
     <div class="city-header" style="background:linear-gradient(rgba(255,140,66,0.07),rgba(255,140,66,0.07)),#0e0404" onclick="toggleCity('xi')">
       <div class="ch-flag">🏺</div>
       <div class="ch-info">
@@ -535,7 +577,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
 
   <!-- BEIJING -->
   <div class="orn-div" aria-hidden="true"><div class="orn-line"></div><div class="orn-txt"><div class="orn-dia"></div>北京<div class="orn-dia"></div></div><div class="orn-line"></div></div>
-  <div class="city-section">
+  <div class="city-section reveal-soft">
     <div class="city-header" style="background:linear-gradient(rgba(255,68,102,0.07),rgba(255,68,102,0.07)),#0e0404" onclick="toggleCity('bj')">
       <div class="ch-flag">🏯</div>
       <div class="ch-info">
@@ -595,7 +637,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
 
   <div class="orn-div" aria-hidden="true"><div class="orn-line"></div><div class="orn-txt"><div class="orn-dia"></div>서울<div class="orn-dia"></div></div><div class="orn-line"></div></div>
   <!-- SEOUL -->
-  <div class="city-section">
+  <div class="city-section reveal-soft">
     <div class="city-header" style="background:linear-gradient(rgba(155,89,182,0.07),rgba(155,89,182,0.07)),#0e0404" onclick="toggleCity('kr')">
       <div class="ch-flag">🇰🇷</div>
       <div class="ch-info">
@@ -658,26 +700,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
 <div class="page" id="page-shopping">
   <div class="shop-section">
     <div class="shop-city-title" style="color:#4a9eff">🇨🇳 Shanghai</div>
-    <div class="shop-grid">
+    <div class="shop-grid reveal-soft">
       <div class="shop-card"><div class="shop-icon">🧧</div><div class="shop-name">Tianzifang</div><div class="shop-type" style="color:#4a9eff">Artesanías únicas</div><div class="shop-desc">Callejones artísticos. Arte local, seda, cerámica de diseñador. Todo original sin copias. Mejor para regalos auténticos.</div></div>
       <div class="shop-card"><div class="shop-icon">📱</div><div class="shop-name">Mercado de Perlas</div><div class="shop-type" style="color:#4a9eff">Electrónicos + Jade</div><div class="shop-desc">Metro Science Museum. 4 pisos. Jade, bisutería, electrónicos, bolsas. Empezar en 30% del precio inicial.</div></div>
       <div class="shop-card"><div class="shop-icon">💎</div><div class="shop-name">Plaza 66 / IAPM Mall</div><div class="shop-type" style="color:#4a9eff">Lujo Internacional</div><div class="shop-desc">LV, Gucci, Hermès, Cartier. Ediciones exclusivas Asia no disponibles en México.</div></div>
       <div class="shop-card"><div class="shop-icon">🛒</div><div class="shop-name">Nanjing Road</div><div class="shop-type" style="color:#4a9eff">Todo tipo</div><div class="shop-desc">5.5km peatonales. Tiendas populares, marcas chinas, street food. Ideal para primera compra en China.</div></div>
     </div>
     <div class="shop-city-title" style="color:#ff8c42">🏺 Xi'an</div>
-    <div class="shop-grid">
+    <div class="shop-grid reveal-soft">
       <div class="shop-card"><div class="shop-icon">🕌</div><div class="shop-name">Muslim Quarter</div><div class="shop-type" style="color:#ff8c42">Ruta de la Seda</div><div class="shop-desc">Soldados terracota miniatura, especias únicas, té pu-erh prensado, jade, bufandas seda. Regatear siempre.</div></div>
       <div class="shop-card"><div class="shop-icon">🎨</div><div class="shop-name">Shuyuanmen Street</div><div class="shop-type" style="color:#ff8c42">Arte y Caligrafía</div><div class="shop-desc">Pinturas de tinta china, caligrafía artística, papel hecho a mano, sellos de jade personalizados con tu nombre.</div></div>
     </div>
     <div class="shop-city-title" style="color:#ff4466">🏯 Beijing</div>
-    <div class="shop-grid">
+    <div class="shop-grid reveal-soft">
       <div class="shop-card"><div class="shop-icon">👜</div><div class="shop-name">Silk Street / Yashow</div><div class="shop-type" style="color:#ff4466">Regateo intenso</div><div class="shop-desc">Ropa, bolsas, electrónicos. Empezar en 20% del precio pedido. El proceso de regateo es parte de la experiencia cultural.</div></div>
       <div class="shop-card"><div class="shop-icon">🏘</div><div class="shop-name">Nanluoguxiang</div><div class="shop-type" style="color:#ff4466">Diseño local</div><div class="shop-desc">Diseñadores jóvenes de Beijing. Moda alternativa, arte, boutiques indie. Calidad alta, precios razonables.</div></div>
       <div class="shop-card"><div class="shop-icon">🎨</div><div class="shop-name">798 Art District</div><div class="shop-type" style="color:#ff4466">Arte contemporáneo</div><div class="shop-desc">Galerías, instalaciones, diseño. Arte chino contemporáneo para coleccionistas y curiosos. Entrada gratis.</div></div>
       <div class="shop-card"><div class="shop-icon">🏯</div><div class="shop-name">Tienda Ciudad Prohibida</div><div class="shop-type" style="color:#ff4466">Souvenirs premium</div><div class="shop-desc">Réplicas oficiales de artefactos imperiales, joyería inspirada en la colección imperial, libros de arte.</div></div>
     </div>
     <div class="shop-city-title" style="color:#9b59b6">🇰🇷 Seúl</div>
-    <div class="shop-grid">
+    <div class="shop-grid reveal-soft">
       <div class="shop-card"><div class="shop-icon">💄</div><div class="shop-name">Myeongdong</div><div class="shop-type" style="color:#9b59b6">K-beauty Capital</div><div class="shop-desc">Sulwhasoo, COSRX, Laneige, Beauty of Joseon, Dr.Jart+, Papa Recipe. 30-40% más barato que en México. Muestras gratis en cada tienda.</div></div>
       <div class="shop-card"><div class="shop-icon">👟</div><div class="shop-name">Hongdae</div><div class="shop-type" style="color:#9b59b6">K-pop + Streetwear</div><div class="shop-desc">ARTBOX, HYBE Insight (BTS), Ktown4u. Álbumes firmados, merchandising K-pop exclusivo, moda alternativa.</div></div>
       <div class="shop-card"><div class="shop-icon">📱</div><div class="shop-name">Yongsan Electronics</div><div class="shop-type" style="color:#9b59b6">Electrónicos</div><div class="shop-desc">Samsung, LG, Sony a precio de fábrica. Pedir factura para tax refund (10% devolución en aeropuerto ICN).</div></div>
@@ -689,7 +731,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',syste
 <!-- TIPS -->
 <div class="page" id="page-tips">
   <div class="section-title">💡 Tips Esenciales — No Olvidar</div>
-  <div class="tips-grid">
+  <div class="tips-grid reveal-soft">
     <div class="tip-card"><div class="tc-icon">🔒</div><div class="tc-title">VPN — CRÍTICO para China</div><div class="tc-text">Contratar ExpressVPN o NordVPN desde México antes de salir. En China están bloqueados: Google, WhatsApp, Instagram, Gmail, YouTube, Facebook. Sin VPN = sin comunicación con México.</div><div class="tc-tags"><span class="tc-tag" style="color:#e74c3c">⚠️ Instalar ANTES de salir de México</span></div></div>
     <div class="tip-card"><div class="tc-icon">💳</div><div class="tc-title">Pagos en China</div><div class="tc-text">China es 95% cashless. Configurar WeChat Pay O Alipay International con tarjeta Visa/Mastercard antes de llegar. Llevar ¥1,000-1,500 en efectivo por persona como respaldo.</div><div class="tc-tags"><span class="tc-tag">WeChat Pay</span><span class="tc-tag">Alipay Internacional</span><span class="tc-tag">¥ efectivo respaldo</span></div></div>
     <div class="tip-card"><div class="tc-icon">🚄</div><div class="tc-title">Trenes Bala China</div><div class="tc-text">Reservar en Trip.com (más fácil que 12306 oficial). Clase Business recomendada. Mostrar pasaporte al abordar. Shanghai→Xi'an: ~5.5h · Xi'an→Beijing: ~4.5h</div><div class="tc-tags"><span class="tc-tag">Trip.com</span><span class="tc-tag">Clase Business</span><span class="tc-tag">Pasaporte obligatorio</span></div></div>
@@ -807,6 +849,7 @@ function showPage(id,el){
   document.getElementById('page-'+id).classList.add('active');
   if(el){el.classList.add('active');el.setAttribute('aria-selected','true');}
   window.scrollTo({top:0,behavior:'auto'});
+  if(window.__revealPage) window.__revealPage(id);
   if(id==='maps'){
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
@@ -962,6 +1005,77 @@ function switchMap(city,el){
   activeFilter='Todos';
   if(map) renderMarkers(city); else {activeCity=city;initMap();}
 }
+
+/* ── CINEMATIC ENGINE ─────────────────────────── */
+(function(){
+  var SEL='.reveal,.reveal-soft,.hero-fade,.map-stage';
+  var reduce=false;
+  try{reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;}catch(e){}
+  function showAll(scope){
+    var els=(scope||document).querySelectorAll(SEL);
+    for(var i=0;i<els.length;i++) els[i].classList.add('in');
+  }
+  function playCinema(scope){
+    var fcs=(scope||document).querySelectorAll('.flight-cinema');
+    for(var i=0;i<fcs.length;i++){var f=fcs[i];f.classList.remove('play');void f.offsetWidth;f.classList.add('play');}
+  }
+  var io=null;
+  if('IntersectionObserver' in window && !reduce){
+    io=new IntersectionObserver(function(ents){
+      ents.forEach(function(en){
+        if(en.isIntersecting){
+          en.target.classList.add('in');
+          if(en.target.classList.contains('flight-cinema')) playCinema(en.target.parentNode);
+          io.unobserve(en.target);
+        }
+      });
+    },{threshold:0.14,rootMargin:'0px 0px -6% 0px'});
+  }
+  /* Force-reveal a page's elements (works even without a scroll container, e.g. inside a tall iframe) */
+  window.__revealPage=function(id){
+    var pg=document.getElementById('page-'+id); if(!pg) return;
+    showAll(pg);
+    if(!reduce) playCinema(pg);
+  };
+  try{
+    if(reduce){ showAll(document); }
+    else if(io){
+      var all=document.querySelectorAll(SEL);
+      for(var i=0;i<all.length;i++) io.observe(all[i]);
+      setTimeout(function(){ window.__revealPage('home'); },70); /* home is visible on load */
+    } else { showAll(document); playCinema(document); }
+  }catch(e){ showAll(document); }
+
+  /* Parallax on the hero kanji watermarks */
+  if(!reduce){
+    var kanji=[].slice.call(document.querySelectorAll('.hero-kanji')), ticking=false;
+    if(kanji.length){
+      window.addEventListener('scroll',function(){
+        if(ticking) return; ticking=true;
+        requestAnimationFrame(function(){
+          var y=window.scrollY||window.pageYOffset||0;
+          for(var i=0;i<kanji.length;i++){ kanji[i].style.transform='translateY('+(y*(i?0.14:0.24))+'px)'; }
+          ticking=false;
+        });
+      },{passive:true});
+    }
+  }
+
+  /* Subtle 3D tilt on cards (desktop pointers only) */
+  try{
+    if(window.matchMedia('(hover:hover) and (pointer:fine)').matches && !reduce){
+      var tilts=[].slice.call(document.querySelectorAll('.tilt'));
+      tilts.forEach(function(c){
+        c.addEventListener('mousemove',function(e){
+          var r=c.getBoundingClientRect();
+          var px=(e.clientX-r.left)/r.width-0.5, py=(e.clientY-r.top)/r.height-0.5;
+          c.style.transform='perspective(620px) rotateX('+(-py*6).toFixed(2)+'deg) rotateY('+(px*6).toFixed(2)+'deg) translateY(-2px)';
+        });
+        c.addEventListener('mouseleave',function(){ c.style.transform=''; });
+      });
+    }
+  }catch(e){}
+})();
 </script>
 </body>
 </html>
