@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "gran-tour",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "/Users/sonni/Library/CloudStorage/OneDrive-Personal/Claude Code/gran-tour-2027"],
+      "port": 8765
+    }
+  ]
+}
