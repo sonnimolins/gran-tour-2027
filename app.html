@@ -297,6 +297,14 @@ html.js .page.active{animation:pageIn .5s cubic-bezier(.22,1,.36,1)}
   .nav-glider{transition:none}
   .day-body{transition:none}
 }
+
+/* ═══ CONCIENCIA TEMPORAL ═══ */
+.cd-chip{display:inline-flex;align-items:center;gap:8px;margin:2px auto 18px;background:linear-gradient(135deg,rgba(201,168,76,0.14),rgba(201,168,76,0.05));border:1px solid rgba(201,168,76,0.35);border-radius:22px;padding:7px 18px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.1),0 4px 16px rgba(201,168,76,0.12)}
+.cd-num{font-size:20px;font-weight:900;color:var(--gold);font-family:'Noto Serif SC',serif;line-height:1}
+.cd-txt{font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1.2px;font-weight:700}
+.hoy-badge{display:inline-block;font-size:9px;font-weight:800;background:linear-gradient(135deg,#c9a84c,#f0d689);color:#1a0808;padding:2px 9px;border-radius:8px;margin-right:7px;letter-spacing:.8px;animation:hoyPulse 2s ease-in-out infinite;vertical-align:middle}
+@keyframes hoyPulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.5)}50%{box-shadow:0 0 0 6px rgba(201,168,76,0)}}
+@media(prefers-reduced-motion:reduce){.hoy-badge{animation:none}}
 </style>
 </head>
 <body>
@@ -1278,11 +1286,35 @@ function switchMap(city,el){
       ctx.beginPath();ctx.arc(p.x,p.y,1.4*p.life+0.4,0,6.2832);ctx.fill();}
     ctx.globalAlpha=1;
   }
+  function sunVec(){
+    var d=new Date();
+    var start=Date.UTC(d.getUTCFullYear(),0,0);
+    var doy=(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())-start)/86400000;
+    var declDeg=-23.44*Math.cos(2*Math.PI*(doy+10)/365);
+    var lonDeg=(12-(d.getUTCHours()+d.getUTCMinutes()/60))*15;
+    return ll2v(declDeg, lonDeg);
+  }
+  function drawNight(ry){
+    var sv=sunVec();
+    var anti={x:-sv.x,y:-sv.y,z:-sv.z};
+    var r=rot3(anti,ry);
+    var f=Math.max(0,Math.min(1,(r.z2+1)/2));
+    var a=projClamp(anti,ry);
+    ctx.save();ctx.beginPath();ctx.arc(CX,CY,R-0.4,0,6.2832);ctx.clip();
+    var ng=ctx.createRadialGradient(a.x,a.y,0,a.x,a.y,R*1.55);
+    var alpha=0.42*Math.max(0.18,f);
+    ng.addColorStop(0,'rgba(4,2,10,'+alpha+')');
+    ng.addColorStop(0.62,'rgba(4,2,10,'+(alpha*0.55)+')');
+    ng.addColorStop(1,'rgba(4,2,10,0)');
+    ctx.fillStyle=ng;ctx.fillRect(CX-R,CY-R,R*2,R*2);
+    ctx.restore();
+  }
   function drawFrame(ry,t,phase){
     ctx.clearRect(0,0,W,H);
     drawStars(performance.now());
     drawGrid(ry);
     drawWorld(ry);
+    drawNight(ry);
     var dir=phase==='back'?-1:1;
     var prog=phase==='idle'?0:(phase==='done'?0:t);
     drawRoute(ry,prog,dir);
@@ -1500,6 +1532,49 @@ function switchMap(city,el){
       setTimeout(function(){requestAnimationFrame(step);},350);
     });
   }
+
+  /* ── Conciencia temporal: countdown + día HOY ── */
+  (function(){
+    function isoToDate(s){var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+    function mkSpan(cls,txt){var s=document.createElement('span');s.className=cls;s.textContent=txt;return s;}
+    var hoy=new Date();hoy=new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate());
+    var salida=new Date(2026,11,28), regreso=new Date(2027,0,14);
+    /* chip en el hero */
+    var sub=document.querySelector('.hero-sub');
+    if(sub){
+      var chip=document.createElement('div');chip.className='cd-chip';
+      if(hoy<salida){
+        var dias=Math.round((salida-hoy)/86400000);
+        chip.appendChild(mkSpan('cd-num',String(dias)));
+        chip.appendChild(mkSpan('cd-txt','días para el despegue ✈'));
+      } else if(hoy<=regreso){
+        var n=Math.round((hoy-salida)/86400000)+1;
+        chip.appendChild(mkSpan('cd-num','Día '+n));
+        chip.appendChild(mkSpan('cd-txt','del Gran Tour 🎒'));
+      } else {
+        chip.appendChild(mkSpan('cd-num','🎊'));
+        chip.appendChild(mkSpan('cd-txt','Viaje completado — qué recuerdos'));
+      }
+      var wrapDiv=document.createElement('div');wrapDiv.style.textAlign='center';
+      wrapDiv.appendChild(chip);
+      sub.parentNode.insertBefore(wrapDiv,sub.nextSibling);
+    }
+    /* badge HOY en el itinerario + auto-abrir el día en curso */
+    var FECHAS={d1:'2026-12-30',d2:'2026-12-31',d3:'2027-01-01',d4:'2027-01-02',d4b:'2027-01-03',d5:'2027-01-04',d6:'2027-01-05',d7:'2027-01-06',d8:'2027-01-07',d10:'2027-01-08',d11:'2027-01-09',d12:'2027-01-10',d13:'2027-01-11',d14:'2027-01-12',d15:'2027-01-13',d16:'2027-01-14'};
+    for(var id in FECHAS){
+      if(isoToDate(FECHAS[id]).getTime()===hoy.getTime()){
+        var body=document.getElementById('body-'+id);
+        if(!body)continue;
+        var header=body.previousElementSibling;
+        var title=header&&header.querySelector('.day-title');
+        if(title)title.insertBefore(mkSpan('hoy-badge','HOY'),title.firstChild);
+        body.classList.add('open');
+        var tog=document.getElementById('tog-'+id);
+        if(tog)tog.classList.add('open');
+        if(header)header.setAttribute('aria-expanded','true');
+      }
+    }
+  })();
 
   /* Pausar el globo cuando sale de pantalla */
   var fc=document.getElementById('fcWrap');
