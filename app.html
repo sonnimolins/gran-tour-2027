@@ -266,12 +266,43 @@ html.js .page.active{animation:pageIn .5s cubic-bezier(.22,1,.36,1)}
 @keyframes vtOut{to{opacity:0;transform:translateY(-8px) scale(.995)}}
 @keyframes vtIn{from{opacity:0;transform:translateY(12px) scale(.997)}}
 @media(prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}
+
+/* ═══════════ MEGA POLISH ═══════════ */
+/* Barra de progreso de lectura */
+#pgbar{position:fixed;top:0;left:0;height:2.5px;width:0%;z-index:1002;background:linear-gradient(90deg,#c9a84c,#f6e7b4);box-shadow:0 0 8px rgba(201,168,76,0.6);pointer-events:none;transition:width .1s linear}
+/* Nav glider: píldora que se desliza entre pestañas */
+.nav-tabs{position:relative}
+.nav-glider{position:absolute;top:9px;height:34px;border-radius:17px;background:linear-gradient(135deg,rgba(201,168,76,0.17),rgba(201,168,76,0.06));border:1px solid rgba(201,168,76,0.35);box-shadow:inset 0 1px 0 rgba(255,255,255,0.14),0 3px 14px rgba(201,168,76,0.14);transition:left .45s cubic-bezier(.22,1,.36,1),width .45s cubic-bezier(.22,1,.36,1);pointer-events:none;z-index:0}
+.ntab{position:relative;z-index:1}
+.ntab.active{background:transparent;border-color:transparent;box-shadow:none}
+/* Acordeón fluido de días (grid-rows animation) */
+.day-body{display:grid;grid-template-rows:0fr;padding:0 20px;background:var(--bg);transition:grid-template-rows .5s cubic-bezier(.22,1,.36,1),padding .5s cubic-bezier(.22,1,.36,1)}
+.day-body.open{display:grid;grid-template-rows:1fr;padding:0 20px 18px;animation:none}
+.db-inner{overflow:hidden;min-height:0}
+/* Spotlight que sigue el cursor en tarjetas (solo desktop) */
+@media(hover:hover) and (pointer:fine){
+.tip-card,.shop-card,.stat-card{position:relative}
+.tip-card::before,.shop-card::before,.stat-card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(200px circle at var(--mx,50%) var(--my,50%),rgba(201,168,76,0.13),transparent 65%);opacity:0;transition:opacity .35s;pointer-events:none;z-index:0}
+.tip-card:hover::before,.shop-card:hover::before,.stat-card:hover::before{opacity:1}
+}
+/* Popups del mapa: pop-in con spring */
+.leaflet-popup{animation:popIn .3s cubic-bezier(.22,1,.36,1)}
+@keyframes popIn{from{opacity:0;transform:translateY(10px) scale(.9)}}
+/* Divisores ornamentales con flujo de luz */
+.orn-line{background:linear-gradient(90deg,transparent,rgba(201,168,76,0.22),rgba(246,231,180,0.5),rgba(201,168,76,0.22),transparent);background-size:220% 100%;animation:ornFlow 7s linear infinite}
+@keyframes ornFlow{from{background-position:200% 0}to{background-position:-100% 0}}
+@media(prefers-reduced-motion:reduce){
+  .orn-line{animation:none}
+  .leaflet-popup{animation:none}
+  .nav-glider{transition:none}
+  .day-body{transition:none}
+}
 </style>
 </head>
 <body>
 <nav class="nav">
   <div class="nav-logo">大旅行 <span>· Gran Tour 2027</span></div>
-  <div class="nav-tabs" role="tablist" aria-label="Secciones de la guía">
+  <div class="nav-tabs" role="tablist" aria-label="Secciones de la guía"><div class="nav-glider" id="navGlider" aria-hidden="true"></div>
     <div class="ntab active" role="tab" tabindex="0" aria-selected="true" onclick="showPage('home',this)" onkeydown="tabKey(event,'home',this)">🏠 Inicio</div>
     <div class="ntab" role="tab" tabindex="0" aria-selected="false" onclick="showPage('maps',this)" onkeydown="tabKey(event,'maps',this)">🗺️ Mapas</div>
     <div class="ntab" role="tab" tabindex="0" aria-selected="false" onclick="showPage('itinerary',this)" onkeydown="tabKey(event,'itinerary',this)">📅 Itinerario</div>
@@ -936,7 +967,8 @@ function __applyPage(id,el){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.ntab').forEach(function(t){t.classList.remove('active');t.setAttribute('aria-selected','false');});
   document.getElementById('page-'+id).classList.add('active');
-  if(el){el.classList.add('active');el.setAttribute('aria-selected','true');}
+  if(el){el.classList.add('active');el.setAttribute('aria-selected','true');el.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});}
+  if(window.__glide) window.__glide(el);
   window.scrollTo({top:0,behavior:'auto'});
   if(window.__revealPage) window.__revealPage(id);
 }
@@ -960,8 +992,8 @@ function showPage(id,el){
     });
   }
 }
-function toggleCity(id){var e=document.getElementById('days-'+id),a=document.getElementById('arr-'+id);e.classList.toggle('open');a.classList.toggle('open',e.classList.contains('open'));}
-function toggleDay(id){var b=document.getElementById('body-'+id),t=document.getElementById('tog-'+id);b.classList.toggle('open');t.classList.toggle('open',b.classList.contains('open'));}
+function toggleCity(id){var e=document.getElementById('days-'+id),a=document.getElementById('arr-'+id);e.classList.toggle('open');var o=e.classList.contains('open');a.classList.toggle('open',o);if(a.parentNode)a.parentNode.setAttribute('aria-expanded',o?'true':'false');}
+function toggleDay(id){var b=document.getElementById('body-'+id),t=document.getElementById('tog-'+id);b.classList.toggle('open');var o=b.classList.contains('open');t.classList.toggle('open',o);var h=b.previousElementSibling;if(h)h.setAttribute('aria-expanded',o?'true':'false');}
 
 /* ── CATEGORIES ───────────────────────────────── */
 var CAT={'Imperdible':{color:'#f0b429',icon:'⭐'},'Historia':{color:'#e74c3c',icon:'🏛️'},'Naturaleza':{color:'#2ecc71',icon:'🌿'},'Shopping':{color:'#4a9eff',icon:'🛍️'},'Gastronomía':{color:'#ff8c42',icon:'🍜'},'Entretenimiento':{color:'#9b59b6',icon:'🎭'},'Hotel':{color:'#1abc9c',icon:'🏨'}};
@@ -1268,6 +1300,10 @@ function switchMap(city,el){
     raf=requestAnimationFrame(tick);
   }
   window.__fcPlay=play;
+  window.__fcVis=function(v){
+    if(!v){if(amb){cancelAnimationFrame(amb);amb=null;}if(raf){cancelAnimationFrame(raf);raf=null;}}
+    else if(state.phase==='idle'||state.phase==='done'){ambient();}
+  };
   wrap.addEventListener('click',play);
   drawFrame(state.ry,0,'idle');
   ambient();
@@ -1343,6 +1379,87 @@ function switchMap(city,el){
       });
     }
   }catch(e){}
+})();
+
+/* ── MEGA POLISH ENGINE ───────────────────────── */
+(function(){
+  var reduce=false;try{reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;}catch(e){}
+
+  /* Barra de progreso de scroll */
+  var bar=document.createElement('div');bar.id='pgbar';document.body.appendChild(bar);
+  var pgTick=false;
+  window.addEventListener('scroll',function(){
+    if(pgTick)return;pgTick=true;
+    requestAnimationFrame(function(){
+      var h=document.documentElement.scrollHeight-window.innerHeight;
+      bar.style.width=(h>0?(window.scrollY/h*100):0)+'%';
+      pgTick=false;
+    });
+  },{passive:true});
+
+  /* Nav glider */
+  var glider=document.getElementById('navGlider');
+  function glide(el){
+    if(!glider)return;
+    el=el||document.querySelector('.ntab.active');
+    if(!el)return;
+    glider.style.left=el.offsetLeft+'px';
+    glider.style.width=el.offsetWidth+'px';
+  }
+  window.__glide=glide;
+  window.addEventListener('resize',function(){glide();});
+  setTimeout(function(){glide();},80);
+
+  /* Acordeón: envolver contenido de cada día para animación grid-rows */
+  var bodies=document.querySelectorAll('.day-body');
+  for(var i=0;i<bodies.length;i++){
+    var b=bodies[i],w=document.createElement('div');
+    w.className='db-inner';
+    while(b.firstChild)w.appendChild(b.firstChild);
+    b.appendChild(w);
+  }
+  /* aria-expanded inicial */
+  document.querySelectorAll('.day-header').forEach(function(h){h.setAttribute('role','button');h.setAttribute('aria-expanded',h.nextElementSibling&&h.nextElementSibling.classList.contains('open')?'true':'false');});
+  document.querySelectorAll('.city-header').forEach(function(h){h.setAttribute('role','button');h.setAttribute('aria-expanded','true');});
+
+  /* Spotlight en tarjetas */
+  try{
+    if(window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+      document.addEventListener('mousemove',function(e){
+        var c=e.target.closest&&e.target.closest('.tip-card,.shop-card,.stat-card');
+        if(!c)return;
+        var r=c.getBoundingClientRect();
+        c.style.setProperty('--mx',(e.clientX-r.left)+'px');
+        c.style.setProperty('--my',(e.clientY-r.top)+'px');
+      },{passive:true});
+    }
+  }catch(e){}
+
+  /* Count-up de las estadísticas del hero */
+  if(!reduce){
+    var stats=document.querySelectorAll('.stat-v');
+    stats.forEach(function(s){
+      var target=parseInt(s.textContent,10);
+      if(isNaN(target))return;
+      var t0=null;
+      function step(now){
+        if(!t0)t0=now;
+        var p=Math.min(1,(now-t0)/900);
+        p=1-Math.pow(1-p,3);
+        s.textContent=Math.round(target*p);
+        if(p<1)requestAnimationFrame(step);
+      }
+      setTimeout(function(){requestAnimationFrame(step);},350);
+    });
+  }
+
+  /* Pausar el globo cuando sale de pantalla */
+  var fc=document.getElementById('fcWrap');
+  if(fc&&'IntersectionObserver' in window){
+    new IntersectionObserver(function(en){
+      if(window.__fcVis)window.__fcVis(en[0].isIntersecting);
+    },{threshold:0.05}).observe(fc);
+  }
 })();
 </script>
 </body>
