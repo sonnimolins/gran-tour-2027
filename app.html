@@ -255,7 +255,7 @@ html.js .page.active{animation:pageIn .5s cubic-bezier(.22,1,.36,1)}
 
 
 /* ═══ GLOBO 3D VUELOS ═══ */
-#fcGlobe{position:absolute;inset:0;width:100%;height:100%;display:block}
+#fcGlobe{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:grab}
 .fc-hud{position:absolute;top:11px;right:14px;font-size:9px;font-weight:800;letter-spacing:1.6px;color:rgba(201,168,76,0.9);font-family:ui-monospace,'SF Mono',Menlo,monospace;background:rgba(14,4,4,0.55);border:1px solid rgba(201,168,76,0.25);border-radius:8px;padding:4px 9px;z-index:3;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);text-transform:uppercase}
 .fc-from{left:14px;bottom:30px}
 .fc-to{right:14px;top:36px}
@@ -1150,18 +1150,29 @@ function switchMap(city,el){
   var D2R=Math.PI/180;
   function ll2v(lat,lon){var la=lat*D2R,lo=lon*D2R;return {x:Math.cos(la)*Math.sin(lo),y:Math.sin(la),z:Math.cos(la)*Math.cos(lo)};}
   var MEX=ll2v(19.43,-99.13), ICN=ll2v(37.46,126.44);
+  var TOUR=[ll2v(31.23,121.47),ll2v(34.26,108.94),ll2v(39.90,116.40)]; /* Shanghai, Xi'an, Beijing */
   function slerp(a,b,t){var d=a.x*b.x+a.y*b.y+a.z*b.z;d=Math.max(-1,Math.min(1,d));var th=Math.acos(d);if(th<1e-6)return a;var s=Math.sin(th),A=Math.sin((1-t)*th)/s,B=Math.sin(t*th)/s;return {x:A*a.x+B*b.x,y:A*a.y+B*b.y,z:A*a.z+B*b.z};}
   var W,H,CX,CY,R;
   function resize(){var r=wrap.getBoundingClientRect(),dp=Math.min(2,window.devicePixelRatio||1);cv.width=r.width*dp;cv.height=r.height*dp;ctx.setTransform(dp,0,0,dp,0,0);W=r.width;H=r.height;CX=W*0.5;CY=H*0.56;R=Math.min(W*0.462,H*0.572);}
   resize(); window.addEventListener('resize',function(){resize();drawFrame(state.ry,state.t,state.phase);});
   /* rotación + proyección pseudo-perspectiva (cámara de videojuego) */
-  function proj(v,ry){
+  function rot3(v,ry){
     var cy=Math.cos(ry),sy=Math.sin(ry);
     var x=v.x*cy - v.z*sy, z=v.x*sy + v.z*cy, y=v.y;
     var ct=Math.cos(TILT),st=Math.sin(TILT);
-    var y2=y*ct - z*st, z2=y*st + z*ct;
-    var persp=3.6, s=persp/(persp - z2);
-    return {x:CX + x*R*s, y:CY - y2*R*s, z:z2, s:s};
+    return {x:x, y2:y*ct - z*st, z2:y*st + z*ct};
+  }
+  function proj(v,ry){
+    var r=rot3(v,ry);
+    var persp=3.6, s=persp/(persp - r.z2);
+    return {x:CX + r.x*R*s, y:CY - r.y2*R*s, z:r.z2, s:s};
+  }
+  /* proyección con puntos traseros anclados al horizonte — permite rellenar continentes */
+  function projClamp(v,ry){
+    var r=rot3(v,ry);
+    if(r.z2>=0){var persp=3.6,s=persp/(persp - r.z2);return {x:CX + r.x*R*s, y:CY - r.y2*R*s, front:true};}
+    var len=Math.sqrt(r.x*r.x + r.y2*r.y2)||1;
+    return {x:CX + r.x/len*R, y:CY - r.y2/len*R, front:false};
   }
   function pathLine(pts,front,color,alpha,w){
     ctx.beginPath();var started=false;
@@ -1194,10 +1205,22 @@ function switchMap(city,el){
     for(var lon=-180;lon<180;lon+=30){pts=[];for(j=0;j<=36;j++)pts.push(proj(ll2v(j*5-90,lon),ry));pathLine(pts,false,GOLD,0.08,0.7);pathLine(pts,true,GOLD,0.36,0.7);}
   }
   function drawWorld(ry){
-    for(var r=0;r<WORLD.length;r++){var ring=WORLD[r],pts=[];
-      for(var i=0;i<ring.length;i+=2)pts.push(proj(ll2v(ring[i+1],ring[i]),ry));
-      pathLine(pts,false,GOLD,0.16,0.65);
-      pathLine(pts,true,'#f0dca3',1,1.3);
+    /* relleno de tierra, recortado a la esfera */
+    ctx.save();ctx.beginPath();ctx.arc(CX,CY,R-0.4,0,6.2832);ctx.clip();
+    for(var r=0;r<WORLD.length;r++){var ring=WORLD[r],pp=[],anyFront=false;
+      for(var i=0;i<ring.length;i+=2){var q=projClamp(ll2v(ring[i+1],ring[i]),ry);pp.push(q);if(q.front)anyFront=true;}
+      if(!anyFront)continue;
+      ctx.beginPath();ctx.moveTo(pp[0].x,pp[0].y);
+      for(var j=1;j<pp.length;j++)ctx.lineTo(pp[j].x,pp[j].y);
+      ctx.closePath();
+      ctx.fillStyle='rgba(186,148,72,0.42)';ctx.fill();
+    }
+    ctx.restore();
+    /* costas y fronteras */
+    for(var r2=0;r2<WORLD.length;r2++){var ring2=WORLD[r2],pts=[];
+      for(var i2=0;i2<ring2.length;i2+=2)pts.push(proj(ll2v(ring2[i2+1],ring2[i2]),ry));
+      pathLine(pts,false,GOLD,0.10,0.6);
+      pathLine(pts,true,'#f0dca3',1,1.25);
     }
   }
   function drawRoute(ry,prog,dir){
@@ -1265,6 +1288,8 @@ function switchMap(city,el){
     drawRoute(ry,prog,dir);
     drawCity(MEX,ry,RED,'MEX',phase==='done'?state.pulse:0);
     drawCity(ICN,ry,PURPLE,'ICN',phase==='hold'?state.pulse:0);
+    for(var ti=0;ti<TOUR.length;ti++){var tp=proj(TOUR[ti],ry);
+      if(tp.z>0.02){ctx.globalAlpha=0.9;ctx.fillStyle='#f0b429';ctx.beginPath();ctx.arc(tp.x,tp.y,1.9*tp.s,0,6.2832);ctx.fill();ctx.globalAlpha=1;}}
     if(phase==='out'||phase==='back')drawPlane(ry,t,dir);
     drawSparks();
   }
@@ -1275,12 +1300,13 @@ function switchMap(city,el){
   function ambient(){
     if(reduce) return;
     if(amb)cancelAnimationFrame(amb);
-    function spin(){
-      state.ry-=0.0022;
+    var base=state.ry, t0a=performance.now();
+    function sway(now){
+      state.ry=base+Math.sin((now-t0a)*0.00042)*0.14;
       drawFrame(state.ry,0,state.phase==='done'?'done':'idle');
-      amb=requestAnimationFrame(spin);
+      amb=requestAnimationFrame(sway);
     }
-    amb=requestAnimationFrame(spin);
+    amb=requestAnimationFrame(sway);
   }
   function play(){
     if(reduce){state.ry=-166.3*D2R;drawFrame(state.ry,0.55,'out');hud.textContent='MEX ⇄ ICN · AM0090/0091';return;}
@@ -1304,7 +1330,25 @@ function switchMap(city,el){
     if(!v){if(amb){cancelAnimationFrame(amb);amb=null;}if(raf){cancelAnimationFrame(raf);raf=null;}}
     else if(state.phase==='idle'||state.phase==='done'){ambient();}
   };
-  wrap.addEventListener('click',play);
+  /* arrastrar = girar · toque corto = volar */
+  var dragX=null,dragged=false,dragRy=0;
+  wrap.addEventListener('pointerdown',function(e){
+    if(state.phase==='out'||state.phase==='back'||state.phase==='hold')return;
+    dragX=e.clientX;dragged=false;dragRy=state.ry;
+    if(amb){cancelAnimationFrame(amb);amb=null;}
+  });
+  wrap.addEventListener('pointermove',function(e){
+    if(dragX===null)return;
+    var dx=e.clientX-dragX;
+    if(Math.abs(dx)>5)dragged=true;
+    if(dragged){state.ry=dragRy+dx*0.0055;drawFrame(state.ry,0,state.phase==='done'?'done':'idle');}
+  });
+  wrap.addEventListener('pointerup',function(e){
+    if(dragX===null){return;}
+    var wasDragged=dragged;dragX=null;dragged=false;
+    if(!wasDragged)play(); else ambient();
+  });
+  wrap.addEventListener('pointercancel',function(){if(dragX!==null){dragX=null;dragged=false;ambient();}});
   drawFrame(state.ry,0,'idle');
   ambient();
 })();
